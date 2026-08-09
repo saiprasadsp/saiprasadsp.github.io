@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "CMD"
+title: "Command Reference"
 permalink: /cmd
 ---
 
