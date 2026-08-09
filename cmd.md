@@ -226,8 +226,12 @@ permalink: /cmd
         </select>
       </div>
       <div class="field" id="newCatField">
-        <label for="f-newcat">New category name</label>
+        <label for="f-newcat">New category name (heading)</label>
         <input id="f-newcat" type="text" placeholder="e.g. Kerberos Attacks">
+      </div>
+      <div class="field" id="newCatDescField">
+        <label for="f-newcatdesc">New category description</label>
+        <input id="f-newcatdesc" type="text" placeholder="one line describing this heading/section">
       </div>
       <div class="field">
         <label for="f-cmd">Command</label>
@@ -713,7 +717,7 @@ function buildGroups(){
   getCustom().forEach(item => {
     let g = groups.find(x => x.id === item.groupId);
     if (!g) {
-      g = { id:item.groupId, title:item.groupTitle, color:'--c-misc', desc:'Commands you\'ve added while learning/practicing.', cmds:[] };
+      g = { id:item.groupId, title:item.groupTitle, color:'--c-misc', desc:item.groupDesc || 'Commands you\'ve added while learning/practicing.', cmds:[] };
       groups.push(g);
     }
     g.cmds.push([item.cmd, item.desc, item.example || '', true, item.uid]);
@@ -833,6 +837,7 @@ const cancelAddBtn = document.getElementById('cancelAddBtn');
 const addForm = document.getElementById('addForm');
 const catSelect = document.getElementById('f-category');
 const newCatField = document.getElementById('newCatField');
+const newCatDescField = document.getElementById('newCatDescField');
 
 function populateCategorySelect(groups){
   const current = catSelect.value;
@@ -842,7 +847,9 @@ function populateCategorySelect(groups){
   toggleNewCatField();
 }
 function toggleNewCatField(){
-  newCatField.style.display = catSelect.value === '__new__' ? 'block' : 'none';
+  const show = catSelect.value === '__new__';
+  newCatField.style.display = show ? 'block' : 'none';
+  newCatDescField.style.display = show ? 'block' : 'none';
 }
 catSelect.addEventListener('change', toggleNewCatField);
 
@@ -857,9 +864,10 @@ addForm.addEventListener('submit', (e) => {
   const example = document.getElementById('f-example').value.trim();
   if (!cmd || !desc) return;
 
-  let groupId, groupTitle;
+  let groupId, groupTitle, groupDesc;
   if (catSelect.value === '__new__') {
     groupTitle = document.getElementById('f-newcat').value.trim() || 'My Notes';
+    groupDesc = document.getElementById('f-newcatdesc').value.trim();
     groupId = slugify(groupTitle);
   } else {
     groupId = catSelect.value;
@@ -867,7 +875,7 @@ addForm.addEventListener('submit', (e) => {
   }
 
   const custom = getCustom();
-  custom.push({ uid: Date.now() + '-' + Math.random().toString(36).slice(2,7), groupId, groupTitle, cmd, desc, example });
+  custom.push({ uid: Date.now() + '-' + Math.random().toString(36).slice(2,7), groupId, groupTitle, groupDesc, cmd, desc, example });
   setCustom(custom);
 
   addForm.reset();
