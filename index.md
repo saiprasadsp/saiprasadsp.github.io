@@ -19,7 +19,7 @@ permalink: /
 
         <h1>
 
-            Shiva Sai
+            Sai
             <br>
 
             <span>Prasad</span>
