@@ -1,1 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="{{ site.description }}">
+
+    <title>
+        {% if page.title %}
+            {{ page.title }} · {{ site.title }}
+        {% else %}
+            {{ site.title }}
+        {% endif %}
+    </title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ '/assets/css/style.css' | relative_url }}">
+
+</head>
+
+
+<body>
+
+    <div class="noise"></div>
+
+
+    <!-- NAVIGATION -->
+
+    <header class="nav-wrapper">
+
+        <nav class="navbar">
+
+            <a href="{{ '/' | relative_url }}"
+               class="logo">
+
+                Saiprasad<span>.</span>
+
+            </a>
+
+
+            <div class="nav-links">
+
+                <a href="{{ '/' | relative_url }}">
+                    About
+                </a>
+
+                <a href="{{ '/blog' | relative_url }}">
+                    Blog
+                </a>
+
+                <a href="{{ '/cmd' | relative_url }}">
+                    Commands
+                </a>
+
+                <a href="https://github.com/saiprasadsp"
+                   target="_blank">
+
+                    GitHub ↗
+
+                </a>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        {{ content }}
+
+    </main>
+
+
+    <footer>
+
+        <span>
+            © {{ site.time | date: '%Y' }}
+            Saiprasad.
+        </span>
+
+        <span>
+            Cybersecurity · Software Engineering
+        </span>
+
+    </footer>
+
+
+    <script src="{{ '/assets/js/script.js' | relative_url }}">
+    </script>
+
+</body>
+
+</html>
