@@ -36,7 +36,7 @@ permalink: /about
 <div class="hero">
   <div class="hero-left">
     <div class="meta"><span class="dot"></span><span>Location · Open to opportunities</span></div>
-    <h1>Your Name</h1>
+    <h1>Saiprasad</h1>
     <div class="subtitle">Role · Short Tagline</div>
     <div class="lead">
       A short paragraph about you: what you do, what you care about, and a couple of notable projects or interests. Replace this text with your own bio.
