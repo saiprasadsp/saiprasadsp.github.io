@@ -1,6 +1,7 @@
 ---
 layout: page
 title: "Blog"
+page_class: blog
 permalink: /blog
 ---
 <style>
