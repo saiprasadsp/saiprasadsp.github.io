@@ -322,7 +322,75 @@ footer {
     font-family: "DM Mono", monospace;
     font-size: 11px;
 }
+/* =========================================
+   PAGE BACKGROUNDS
+   ========================================= */
 
+/* HOME */
+.page-home {
+    background:
+        radial-gradient(
+            circle at 75% 35%,
+            rgba(70, 255, 150, 0.10),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 20% 80%,
+            rgba(20, 120, 80, 0.08),
+            transparent 35%
+        ),
+        #070b09;
+}
+
+
+/* BLOG */
+.page-blog {
+    background:
+        linear-gradient(
+            rgba(10, 20, 30, 0.92),
+            rgba(5, 10, 18, 0.98)
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(80, 120, 255, 0.14),
+            transparent 30%
+        );
+
+    background-attachment: fixed;
+}
+
+
+/* ABOUT */
+.page-about {
+    background:
+        radial-gradient(
+            circle at 25% 25%,
+            rgba(170, 80, 255, 0.12),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 80% 75%,
+            rgba(100, 40, 180, 0.08),
+            transparent 35%
+        ),
+        #09070d;
+}
+
+
+/* COMMANDS */
+.page-commands {
+    background:
+        radial-gradient(
+            circle at 70% 30%,
+            rgba(255, 170, 60, 0.10),
+            transparent 28%
+        ),
+        linear-gradient(
+            135deg,
+            #0b0906,
+            #0a0d09
+        );
+}
 @media (max-width: 720px) {
     .nav-wrapper {
         width: min(calc(100% - 24px), 960px);
