@@ -1,6 +1,7 @@
 ---
 layout: page
-title: "Command Reference"
+title: "Commands"
+page_class: commands
 permalink: /cmd
 ---
 
