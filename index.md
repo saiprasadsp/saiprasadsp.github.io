@@ -66,26 +66,10 @@ permalink: /
 
             <a class="button"
                href="https://github.com/saiprasadsp"
-               target="_blank">
+               target="_blank"
+               rel="noopener noreferrer">
 
                 GitHub
-
-            </a>
-
-
-            <a class="button"
-               href="https://www.linkedin.com/in/YOUR_LINKEDIN_USERNAME/"
-               target="_blank">
-
-                LinkedIn
-
-            </a>
-
-
-            <a class="button"
-               href="mailto:YOUR_EMAIL@gmail.com">
-
-                Email
 
             </a>
 
