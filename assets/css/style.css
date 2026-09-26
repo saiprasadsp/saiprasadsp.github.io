@@ -32,6 +32,8 @@ body {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 
     color: var(--text);
     background: var(--background);
@@ -88,6 +90,8 @@ body::before {
 .nav-wrapper {
     width: min(calc(100% - 40px), 960px);
     margin: 4px auto 0;
+    position: relative;
+    z-index: 100;
 }
 
 .navbar {
@@ -116,6 +120,11 @@ body::before {
     font-weight: 700;
 
     text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.logo:hover {
+    color: var(--accent);
 }
 
 .logo span {
@@ -132,6 +141,7 @@ body::before {
     padding: 8px 12px;
 
     border-radius: 22px;
+    border-bottom: 2px solid transparent;
 
     color: var(--muted);
 
@@ -141,17 +151,35 @@ body::before {
     transition:
         color 0.2s ease,
         background 0.2s ease,
-        transform 0.2s ease;
+        transform 0.2s ease,
+        border-color 0.2s ease;
 }
 
-.nav-links a:first-child,
 .nav-links a:hover {
     color: #06120e;
     background: var(--accent);
+    transform: translateY(-1px);
 }
 
-.nav-links a:hover {
-    transform: translateY(-1px);
+/* Active nav link highlighting */
+.nav-links a.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+    background: transparent;
+}
+
+.page-home .nav-links a:nth-child(1),
+.page-about .nav-links a:nth-child(1),
+.page-blog .nav-links a:nth-child(2),
+.page-commands .nav-links a:nth-child(3) {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+.nav-links a:first-child {
+    color: #06120e;
+    background: var(--accent);
+    border-bottom: 2px solid transparent;
 }
 
 
@@ -162,6 +190,7 @@ body::before {
 main {
     width: min(calc(100% - 40px), var(--max-width));
     margin: 0 auto;
+    flex: 1;
 }
 
 
@@ -517,9 +546,9 @@ h1 span {
    ========================================= */
 
 .page-section {
-    min-height: 650px;
-
+    min-height: auto;
     padding-top: 80px;
+    padding-bottom: 80px;
 }
 
 .page-content {
@@ -532,11 +561,15 @@ h1 span {
     line-height: 1.8;
 }
 
+.page-content h1,
+.page-content h2 {
+    position: relative;
+    z-index: 2;
+    color: var(--text);
+}
+
 .page-content h2 {
     margin-top: 42px;
-
-    color: var(--text);
-
     font-size: 24px;
 }
 
@@ -621,14 +654,10 @@ h1 span {
 
 
 /* =========================================
-   PAGE BACKGROUNDS
+   PAGE BACKGROUNDS - UNIFIED
    ========================================= */
 
-
-/* HOME
-   Dark green cybersecurity atmosphere
-*/
-
+/* BASE - Home page */
 .page-home {
     background:
         radial-gradient(
@@ -642,91 +671,77 @@ h1 span {
             transparent 35%
         ),
         #080d0c;
+    background-attachment: fixed;
 }
 
 
-/* BLOG
-   Deep blue + technical grid
-*/
-
+/* BLOG - Same base, different accent tint */
 .page-blog {
     background:
         radial-gradient(
             circle at 85% 15%,
-            rgba(70, 110, 255, 0.18),
+            rgba(45, 227, 163, 0.12),
             transparent 30%
         ),
         radial-gradient(
-            circle at 10% 80%,
-            rgba(60, 70, 180, 0.10),
+            circle at 15% 80%,
+            rgba(20, 120, 80, 0.08),
             transparent 35%
         ),
-        #080b14;
+        #080d0c;
+    background-attachment: fixed;
 }
 
-.page-blog::after {
-    content: "";
+.page-blog .section-title h1 {
+    position: relative;
+    z-index: 10;
+}
 
-    position: fixed;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    z-index: -1;
-
-    background-image:
-        linear-gradient(
-            rgba(100, 130, 255, 0.035) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(100, 130, 255, 0.035) 1px,
-            transparent 1px
-        );
-
-    background-size: 45px 45px;
+.page-blog .page-content h2 {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(135deg, #080d0c 0%, rgba(8, 13, 12, 0.95) 100%);
+    padding: 8px 12px;
+    border-left: 3px solid var(--accent);
+    margin-left: -12px;
+    margin-right: -12px;
+    padding-left: 12px;
 }
 
 
-/* ABOUT
-   Deep purple atmosphere
-*/
-
+/* ABOUT - Same base, unified style */
 .page-about {
     background:
         radial-gradient(
-            circle at 20% 25%,
-            rgba(170, 80, 255, 0.16),
-            transparent 30%
+            circle at 75% 30%,
+            rgba(45, 227, 163, 0.12),
+            transparent 32%
         ),
         radial-gradient(
-            circle at 85% 75%,
-            rgba(100, 40, 180, 0.12),
+            circle at 15% 80%,
+            rgba(20, 120, 80, 0.08),
             transparent 35%
         ),
-        #0c0812;
+        #080d0c;
+    background-attachment: fixed;
 }
 
 
-/* COMMANDS
-   Terminal / amber atmosphere
-*/
-
+/* COMMANDS - UNIFIED to match other pages (removed amber theme) */
 .page-commands {
     background:
         radial-gradient(
-            circle at 75% 20%,
-            rgba(255, 170, 60, 0.15),
-            transparent 28%
+            circle at 75% 30%,
+            rgba(45, 227, 163, 0.12),
+            transparent 32%
         ),
         radial-gradient(
-            circle at 20% 85%,
-            rgba(200, 100, 30, 0.08),
+            circle at 15% 80%,
+            rgba(20, 120, 80, 0.08),
             transparent 35%
         ),
-        #0d0b07;
+        #080d0c;
+    background-attachment: fixed;
 }
 
 
@@ -743,12 +758,12 @@ h1 span {
 
     border:
         1px solid
-        rgba(100, 130, 255, 0.15);
+        rgba(45, 227, 163, 0.2);
 
     border-radius: 14px;
 
     background:
-        rgba(12, 16, 28, 0.65);
+        rgba(12, 20, 18, 0.8);
 
     backdrop-filter: blur(8px);
 
@@ -761,7 +776,7 @@ h1 span {
 .page-blog .post:hover,
 .page-blog .blog-post:hover {
     border-color:
-        rgba(100, 130, 255, 0.35);
+        rgba(45, 227, 163, 0.4);
 
     transform: translateY(-2px);
 }
@@ -773,19 +788,15 @@ h1 span {
 
 .page-commands .page-content pre {
     border-color:
-        rgba(255, 170, 60, 0.18);
-
-    box-shadow:
-        0 0 30px
-        rgba(255, 150, 40, 0.04);
+        rgba(45, 227, 163, 0.2);
 }
 
 .page-commands .page-content code {
-    color: #ffc875;
+    color: #b3e5d1;
 }
 
 .page-commands .section-title > span {
-    color: #ffb45a;
+    color: var(--accent);
 }
 
 
@@ -806,8 +817,7 @@ footer {
             var(--max-width)
         );
 
-    margin: 0 auto;
-
+    margin: auto auto 0;
     padding: 28px 0 34px;
 
     color: var(--subtle);
@@ -815,6 +825,7 @@ footer {
     font-family: "DM Mono", monospace;
 
     font-size: 11px;
+    flex-shrink: 0;
 }
 
 
@@ -822,7 +833,7 @@ footer {
    MOBILE
    ========================================= */
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
 
     .nav-wrapper {
         width:
@@ -830,6 +841,25 @@ footer {
                 calc(100% - 24px),
                 960px
             );
+        margin: 2px auto 0;
+    }
+
+    .navbar {
+        padding: 0 16px;
+        min-height: 56px;
+    }
+
+    .logo {
+        font-size: 14px;
+    }
+
+    .nav-links {
+        gap: 4px;
+    }
+
+    .nav-links a {
+        padding: 6px 10px;
+        font-size: 13px;
     }
 
     .nav-links a:nth-child(3) {
@@ -845,29 +875,32 @@ footer {
     }
 
     .hero {
-        display: block;
-
+        grid-template-columns: 1fr;
         min-height: auto;
+        padding: 60px 0 50px;
+        gap: 30px;
+    }
 
-        padding: 78px 0 68px;
+    .hero-content {
+        order: 2;
     }
 
     .network-container {
-        width: 240px;
-        height: 240px;
-
-        margin: 56px auto 0;
+        order: 1;
+        width: 220px;
+        height: 220px;
+        margin: 0 auto;
     }
 
     .projects-grid,
     .skills-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
 
     .page-section {
-        min-height: auto;
-
         padding-top: 60px;
+        padding-bottom: 60px;
     }
 
     footer {
@@ -878,481 +911,184 @@ footer {
             );
 
         flex-direction: column;
+        gap: 12px;
+        font-size: 10px;
+        padding: 20px 0 24px;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 7vw, 3.5rem);
+    }
+
+    .page-content h2 {
+        font-size: 20px;
+    }
+
+    .page-content h3 {
+        font-size: 16px;
     }
 }
 
 
-@media (max-width: 450px) {
+@media (max-width: 640px) {
+
+    .nav-wrapper {
+        width:
+            min(
+                calc(100% - 16px),
+                100%
+            );
+        margin: 2px auto 0;
+    }
 
     .navbar {
-        padding: 0 14px;
+        padding: 0 12px;
+        min-height: 50px;
+        border-radius: 24px;
+    }
+
+    .logo {
+        font-size: 13px;
     }
 
     .nav-links a {
-        padding: 7px 8px;
-
+        padding: 5px 8px;
         font-size: 12px;
     }
 
-    .nav-links a:nth-child(2) {
+    .nav-links a:nth-child(2),
+    .nav-links a:nth-child(3) {
         display: none;
     }
 
+    main {
+        width:
+            min(
+                calc(100% - 24px),
+                var(--max-width)
+            );
+    }
+
     h1 {
-        font-size: 3.35rem;
+        font-size: clamp(2rem, 6vw, 3rem);
+        margin-bottom: 10px;
+    }
+
+    .hero {
+        padding: 50px 0 40px;
     }
 
     .hero-buttons {
         flex-direction: column;
-        align-items: stretch;
+        gap: 8px;
     }
 
     .button {
         width: 100%;
+        min-height: 42px;
+        font-size: 13px;
     }
-
-    .page-content pre {
-        padding: 15px;
-
-        font-size: 12px;
-    }
-}
-/* =========================================================
-   RESPONSIVE PAGE LAYOUT
-   ========================================================= */
-
-
-/* ---------------------------------------------------------
-   DESKTOP PAGE WIDTHS
-   --------------------------------------------------------- */
-
-/* Home keeps the focused portfolio layout */
-.page-home main {
-    width: min(calc(100% - 48px), 1100px);
-}
-
-
-/* About / Blog get more breathing room */
-.page-about main,
-.page-blog main {
-    width: min(calc(100% - 48px), 1100px);
-}
-
-
-/* Commands is an application-like page.
-   Give it almost the entire desktop width. */
-.page-commands main {
-    width: min(calc(100% - 48px), 1500px);
-}
-
-
-/* ---------------------------------------------------------
-   COMMANDS PAGE
-   --------------------------------------------------------- */
-
-.page-commands .page-section {
-    width: 100%;
-}
-
-
-/*
-   If your command page has a sidebar + content wrapper,
-   these rules make it use the desktop space.
-*/
-
-.page-commands .commands-layout,
-.page-commands .command-layout,
-.page-commands .commands-container,
-.page-commands .cmd-layout {
-    width: 100%;
-    max-width: 1500px;
-
-    margin: 0 auto;
-
-    display: grid;
-
-    grid-template-columns:
-        240px
-        minmax(0, 1fr);
-
-    gap: 40px;
-
-    align-items: start;
-}
-
-
-/* Sidebar */
-
-.page-commands .sidebar,
-.page-commands .commands-sidebar,
-.page-commands .cmd-sidebar {
-    width: 100%;
-
-    position: sticky;
-    top: 20px;
-
-    max-height: calc(100vh - 40px);
-
-    overflow-y: auto;
-}
-
-
-/* Main command content */
-
-.page-commands .command-content,
-.page-commands .commands-content,
-.page-commands .cmd-content {
-    width: 100%;
-
-    max-width: 950px;
-
-    min-width: 0;
-}
-
-
-/* Make the command title/content more readable */
-
-.page-commands .command-content h1,
-.page-commands .commands-content h1,
-.page-commands .cmd-content h1 {
-    max-width: 700px;
-}
-
-
-/* Command cards */
-
-.page-commands .command-card,
-.page-commands .cmd-card {
-    width: 100%;
-}
-
-
-/* ---------------------------------------------------------
-   GENERAL CONTENT WIDTH
-   --------------------------------------------------------- */
-
-.page-content {
-    width: 100%;
-}
-
-
-/* Prevent long text from becoming too wide */
-
-.page-blog .page-content {
-    max-width: 900px;
-}
-
-.page-about .page-content {
-    max-width: 900px;
-}
-
-
-/* =========================================================
-   TABLET
-   ========================================================= */
-
-@media (max-width: 1100px) {
-
-    .page-home main,
-    .page-about main,
-    .page-blog main {
-        width: min(calc(100% - 40px), 900px);
-    }
-
-    .page-commands main {
-        width: min(calc(100% - 40px), 1100px);
-    }
-
-    .page-commands .commands-layout,
-    .page-commands .command-layout,
-    .page-commands .commands-container,
-    .page-commands .cmd-layout {
-        grid-template-columns:
-            210px
-            minmax(0, 1fr);
-
-        gap: 28px;
-    }
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 720px) {
-
-    /* ---------------------------------------------
-       GLOBAL
-       --------------------------------------------- */
-
-    main,
-    .page-home main,
-    .page-about main,
-    .page-blog main,
-    .page-commands main {
-        width: calc(100% - 32px);
-
-        max-width: none;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-
-    /* ---------------------------------------------
-       NAVIGATION
-       --------------------------------------------- */
-
-    .nav-wrapper {
-        width: calc(100% - 24px);
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .navbar {
-        width: 100%;
-    }
-
-
-    /* ---------------------------------------------
-       HOME
-       --------------------------------------------- */
-
-    .hero {
-        width: 100%;
-
-        text-align: center;
-    }
-
-    .hero-content {
-        width: 100%;
-    }
-
-    .location {
-        justify-content: center;
-    }
-
-    .hero h1 {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .description {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .hero-buttons {
-        justify-content: center;
-    }
-
-
-    /* ---------------------------------------------
-       SECTIONS
-       --------------------------------------------- */
-
-    .section {
-        width: 100%;
-    }
-
-    .section-title {
-        justify-content: center;
-    }
-
-    .page-section {
-        width: 100%;
-
-        padding-top: 50px;
-    }
-
-    .page-content {
-        width: 100%;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-
-    /* ---------------------------------------------
-       BLOG
-       --------------------------------------------- */
-
-    .page-blog .page-content {
-        max-width: 700px;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-
-    /* ---------------------------------------------
-       ABOUT
-       --------------------------------------------- */
-
-    .page-about .page-content {
-        max-width: 700px;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-
-    /* ---------------------------------------------
-       COMMANDS
-       --------------------------------------------- */
-
-    .page-commands main {
-        width: calc(100% - 24px);
-    }
-
-    /*
-       Convert desktop sidebar/content layout
-       into a single mobile column.
-    */
-
-    .page-commands .commands-layout,
-    .page-commands .command-layout,
-    .page-commands .commands-container,
-    .page-commands .cmd-layout {
-        display: flex;
-
-        flex-direction: column;
-
-        width: 100%;
-
-        gap: 20px;
-    }
-
-
-    /*
-       Sidebar becomes a normal mobile section.
-    */
-
-    .page-commands .sidebar,
-    .page-commands .commands-sidebar,
-    .page-commands .cmd-sidebar {
-        position: static;
-
-        width: 100%;
-
-        max-height: none;
-
-        overflow: visible;
-    }
-
-
-    /*
-       Main command area stays centered.
-    */
-
-    .page-commands .command-content,
-    .page-commands .commands-content,
-    .page-commands .cmd-content {
-        width: 100%;
-
-        max-width: 700px;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-
-    /*
-       Prevent command cards from overflowing.
-    */
-
-    .page-commands .command-card,
-    .page-commands .cmd-card {
-        width: 100%;
-
-        max-width: 100%;
-    }
-
-
-    /* ---------------------------------------------
-       PROJECTS
-       --------------------------------------------- */
 
     .projects-grid,
     .skills-container {
-        width: 100%;
-
         grid-template-columns: 1fr;
+        gap: 10px;
     }
 
-
-    /* ---------------------------------------------
-       FOOTER
-       --------------------------------------------- */
-
-    footer {
-        width: calc(100% - 32px);
-
-        margin-left: auto;
-        margin-right: auto;
-
-        text-align: center;
-
-        align-items: center;
+    .project-card {
+        min-height: 180px;
+        padding: 16px;
     }
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
-
-@media (max-width: 450px) {
-
-    main,
-    .page-home main,
-    .page-about main,
-    .page-blog main {
-        width: calc(100% - 24px);
-    }
-
-    .page-commands main {
-        width: calc(100% - 16px);
-    }
-
-
-    .navbar {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-
-    .nav-links {
-        gap: 2px;
-    }
-
 
     .page-section {
-        padding-top: 40px;
+        padding-top: 50px;
+        padding-bottom: 50px;
     }
 
+    .section-title {
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .section-title h2 {
+        font-size: 20px;
+    }
 
     .page-content {
         font-size: 14px;
     }
 
-
-    .page-content h1 {
-        font-size: 2.7rem;
+    .page-content h2 {
+        font-size: 18px;
+        margin-top: 28px;
     }
 
+    .page-content h3 {
+        font-size: 15px;
+        margin-top: 20px;
+    }
+
+    .page-content p {
+        margin: 0 0 16px;
+    }
 
     .page-content pre {
-        max-width: 100%;
-
-        overflow-x: auto;
+        padding: 12px;
+        font-size: 11px;
+        margin: 16px 0;
     }
 
+    footer {
+        width:
+            min(
+                calc(100% - 24px),
+                var(--max-width)
+            );
+        padding: 16px 0 20px;
+        font-size: 9px;
+    }
 
-    .project-card,
-    .skill-group {
-        padding: 20px;
+    .location {
+        font-size: 11px;
+        margin-bottom: 12px;
+    }
+
+    .role {
+        font-size: 14px;
+        margin: 12px 0 12px;
+    }
+
+    .terminal-text {
+        font-size: 12px;
+        margin: 0 0 16px;
+    }
+
+    .description {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+}
+
+
+/* =========================================
+   COMMANDS GRID OPTIMIZATION
+   ========================================= */
+
+/* Improve grid spacing for commands page cards */
+.page-commands .grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 12px !important;
+}
+
+@media (max-width: 900px) {
+    .page-commands .grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .page-commands .grid {
+        grid-template-columns: 1fr !important;
     }
 }
