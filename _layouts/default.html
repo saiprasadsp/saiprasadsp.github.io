@@ -58,15 +58,18 @@
 
             <div class="nav-links">
 
-                <a href="{{ '/about' | relative_url }}">
+                <a href="{{ '/about' | relative_url }}"
+                   {% if page.url == '/about/' or page.page_class == 'about' %}class="active"{% endif %}>
                     About
                 </a>
 
-                <a href="{{ '/blog' | relative_url }}">
+                <a href="{{ '/blog' | relative_url }}"
+                   {% if page.url == '/blog/' or page.page_class == 'blog' %}class="active"{% endif %}>
                     Blog
                 </a>
 
-                <a href="{{ '/cmd' | relative_url }}">
+                <a href="{{ '/cmd' | relative_url }}"
+                   {% if page.url == '/cmd/' or page.page_class == 'commands' %}class="active"{% endif %}>
                     Commands
                 </a>
 
