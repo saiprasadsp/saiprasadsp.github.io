@@ -5,184 +5,86 @@ page_class: walkthrough
 permalink: /gamingserver
 ---
 
-/* ============================================================
-   CTF / VAPT Writeup Theme — dark terminal aesthetic
-   Drop this in your Jekyll assets (e.g. assets/css/ctf-writeup.css)
-   and import/link it from the post layout, or scope it to a
-   wrapper div like <div class="writeup"> ... </div> if you don't
-   want it applying site-wide.
-   ============================================================ */
+<header class="walkthrough-intro">
+  <p class="walkthrough-kicker">TryHackMe · Room walkthrough</p>
+  <p class="walkthrough-deck">A guided path from initial discovery to the user and root flags, with the key findings and commands grouped by stage.</p>
+  <p class="walkthrough-meta"><span>Updated Nov 12, 2026</span><span>Written by @Otter</span></p>
+</header>
 
-:root {
-  --bg: #0d1117;
-  --bg-alt: #161b22;
-  --fg: #c9d1d9;
-  --fg-dim: #8b949e;
-  --accent: #39ff14;      /* terminal green */
-  --accent-dim: #2ea043;
-  --accent-alt: #58a6ff;  /* cyan-blue for links */
-  --warn: #f78166;
-  --border: #30363d;
-  --code-bg: #010409;
-  --font-mono: "Fira Code", "JetBrains Mono", "Source Code Pro", Consolas, monospace;
-}
+<div class="walkthrough-summary" aria-label="Walkthrough summary">
+  <div><span class="summary-label">Target</span><strong>GamingServer</strong></div>
+  <div><span class="summary-label">Open services</span><strong>SSH · HTTP</strong></div>
+  <div><span class="summary-label">Attack path</span><strong>Web discovery → SSH → LXD</strong></div>
+</div>
 
-.writeup {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-mono);
-  line-height: 1.65;
-  padding: 2rem 1.5rem;
-  max-width: 860px;
-  margin: 0 auto;
-}
+## Overview
 
-/* Headings */
-.writeup h1,
-.writeup h2,
-.writeup h3 {
-  color: var(--accent);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.3rem;
-  margin-top: 2.2rem;
-}
+The goal was to obtain both the user and root flags. The foothold came from discovering an encrypted SSH key and a wordlist in hidden web paths. After logging in, the `lxd` group membership provided the privilege-escalation route in this intentionally vulnerable lab.
 
-.writeup h1::before { content: "$ "; color: var(--accent-dim); }
-.writeup h2::before { content: "## "; color: var(--accent-dim); }
-.writeup h3::before { content: "### "; color: var(--accent-dim); }
+<div class="walkthrough-notice"><strong>Lab context</strong><p>These steps are for the authorized TryHackMe GamingServer room and should only be used in the provided environment.</p></div>
 
-.writeup h1 { font-size: 1.8rem; }
-.writeup h2 { font-size: 1.4rem; }
-.writeup h3 { font-size: 1.15rem; }
+## 1. Recon
 
-/* Byline / meta row */
-.writeup .meta {
-  color: var(--fg-dim);
-  font-size: 0.85rem;
-  margin-bottom: 1.5rem;
-}
+An `nmap` scan showed two open ports:
 
-/* Paragraphs & lists */
-.writeup p { margin: 0.9rem 0; }
+| Port | Service | Notes |
+| --- | --- | --- |
+| 22 | SSH | Remote shell access may be possible with valid credentials. |
+| 80 | HTTP | The web application should be enumerated before attack execution. |
 
-.writeup ul,
-.writeup ol {
-  padding-left: 1.4rem;
-  margin: 0.8rem 0;
-}
+## 2. Web enumeration
 
-.writeup li { margin: 0.35rem 0; }
+A `feroxbuster` scan against the website root surfaced paths that were not linked from the normal site:
 
-/* Inline code */
-.writeup code {
-  background: var(--code-bg);
-  color: var(--accent);
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-  font-size: 0.92em;
-  border: 1px solid var(--border);
-}
+- `/secretkey` served an encrypted RSA private key.
+- `/uploads` contained `dict.lst`, which was later used to recover the passphrase.
+- `/secret` was also discovered during enumeration.
 
-/* Code blocks */
-.writeup pre {
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent-dim);
-  border-radius: 6px;
-  padding: 1rem 1.2rem;
-  overflow-x: auto;
-  margin: 1.2rem 0;
-}
+## 3. Foothold: recover the SSH passphrase
 
-.writeup pre code {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--fg);
-}
+The private key had to be converted to a format John the Ripper could process:
 
-/* Terminal-prompt styling for shell blocks:
-   add class="language-bash" (Jekyll/Rouge does this automatically) */
-.writeup pre.language-bash code::before {
-  content: "";
-}
+```bash
+python3 /usr/share/john/ssh2john.py SecretKey > keyhash
+john keyhash -w=dict.lst
+```
 
-/* Links */
-.writeup a {
-  color: var(--accent-alt);
-  text-decoration: none;
-  border-bottom: 1px dashed var(--accent-alt);
-}
-.writeup a:hover {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
+Once the passphrase was recovered, the key was used for SSH access:
 
-/* Tables (flags, ports, etc.) */
-.writeup table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.2rem 0;
-  font-size: 0.92rem;
-}
+```bash
+ssh -i SecretKey <user>@<target-ip>
+```
 
-.writeup th,
-.writeup td {
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.8rem;
-  text-align: left;
-}
+This gave a shell as the key owner and allowed access to the user flag.
 
-.writeup th {
-  background: var(--bg-alt);
-  color: var(--accent);
-}
+## 4. Privilege escalation: LXD group membership
 
-.writeup tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
-}
+`linpeas.sh` identified the user as a member of the `lxd` group. In this lab, that is effectively a path to root on the host because unprivileged users in the group can run a container with privileged settings and mount the host filesystem.
 
-/* Flags — highlight as a callout */
-.writeup .flag {
-  background: var(--bg-alt);
-  border: 1px solid var(--accent-dim);
-  border-radius: 6px;
-  padding: 0.6rem 1rem;
-  margin: 0.6rem 0;
-  font-size: 0.95rem;
-}
-.writeup .flag code {
-  color: var(--warn);
-}
+The workflow used an Alpine image built with [saghul's lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine), transferred it into the target, then imported it into LXD:
 
-/* Blockquotes (e.g. tool output snippets, notes) */
-.writeup blockquote {
-  border-left: 3px solid var(--fg-dim);
-  margin: 1rem 0;
-  padding: 0.3rem 1rem;
-  color: var(--fg-dim);
-  font-style: italic;
-}
+```bash
+lxc image import alpine-v3.13-x86_64-20210218_0139.tar.gz --alias myimage
+```
 
-/* Horizontal rule between major sections */
-.writeup hr {
-  border: none;
-  border-top: 1px dashed var(--border);
-  margin: 2rem 0;
-}
+A public LXD privilege-escalation script (EDB-ID 46978) was executed against the imported image:
 
-/* Scrollbar (webkit) to match theme */
-.writeup pre::-webkit-scrollbar { height: 8px; }
-.writeup pre::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
+```bash
+./exploit.sh -f alpine-v3.13-x86_64-20210218_0139.tar.gz
+```
 
-/* Mobile */
-@media (max-width: 600px) {
-  .writeup { padding: 1.2rem 1rem; }
-  .writeup h1 { font-size: 1.5rem; }
-  .writeup h2 { font-size: 1.2rem; }
-}
+This launched a privileged container with the host filesystem mounted inside it, granting a root shell. The root flag was then read from the mounted filesystem.
+
+## Flags
+
+<div class="walkthrough-flags">
+  <div><span class="flag-label">User</span><code>THM{...}</code></div>
+  <div><span class="flag-label">Root</span><code>THM{...}</code></div>
+</div>
+
+## Key takeaways
+
+- Hidden or unlinked web paths can hold the entire foothold chain.
+- `id` and group membership checks are fast, high-value privilege-escalation checks.
+- A user in `lxd` can become root in the lab environment when a privileged container is created.
 
