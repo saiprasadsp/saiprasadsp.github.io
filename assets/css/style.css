@@ -191,3 +191,38 @@
         padding: 9px 10px;
     }
 }
+
+/* =========================================
+   GLOBAL NAVIGATION FIX
+   ========================================= */
+
+/* The base stylesheet highlights the first link on every page. Only highlight
+   the link for the current page so navigation does not show multiple actives. */
+.nav-links a:first-child:not(.active) {
+    color: var(--muted);
+    background: transparent;
+}
+
+.nav-links a.active,
+.page-home .nav-links a:nth-child(1),
+.page-about .nav-links a:nth-child(1),
+.page-blog .nav-links a:nth-child(2),
+.page-commands .nav-links a:nth-child(3) {
+    color: #06120e;
+    background: var(--accent);
+    border-bottom-color: transparent;
+}
+
+/* Keep long walkthrough content from forcing the whole page wider than the
+   viewport, especially on narrow screens. */
+.page-walkthrough,
+.page-walkthrough main,
+.page-walkthrough .page-content {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.page-walkthrough .page-content pre,
+.page-walkthrough .page-content table {
+    max-width: 100%;
+}
